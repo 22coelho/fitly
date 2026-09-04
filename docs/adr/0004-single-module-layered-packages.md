@@ -1,0 +1,5 @@
+# Single `:app` module, camadas como pacotes (não Gradle modules)
+
+A estrutura convencional para projetos Android/KMP maiores usa Gradle modules por feature e por camada (`:feature:x:domain`, `:core:database`, etc.), com `:build-logic` a gerir convention plugins. Para o MVP do FITLY — solo dev, 3 features pequenas (Home, Wardrobe, History) que partilham o mesmo domínio central (`ClothingItem`, `Outfit`) — isso adicionaria ceremónia sem benefício real: as features nem sequer se isolam bem, porque quase tudo pertenceria a `core:domain` de qualquer forma.
+
+Ficamos com um único módulo `:app`, organizado internamente por camada e depois por feature em pacotes: `data/`, `domain/`, `presentation/{home,wardrobe,history}`, `di/`. As regras de dependência entre camadas (domain não depende de data/presentation) mantêm-se, só não são impostas pelo Gradle. Se o projeto crescer o suficiente para justificar tempos de build separados ou fronteiras de equipa, extrair pacotes para módulos é um refactor mecânico, não uma reescrita — a direção das dependências já está correta.
