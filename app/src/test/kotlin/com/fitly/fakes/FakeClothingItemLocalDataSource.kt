@@ -13,9 +13,10 @@ class FakeClothingItemLocalDataSource : ClothingItemLocalDataSource {
     private val items = MutableStateFlow<List<ClothingItem>>(emptyList())
     var upsertError: DataError.Local? = null
 
-    /** When set, upsert() suspends here until the test completes it - lets a test
-     * interleave a second action while the first upsert is still in flight. */
+    /** When set, upsert()/delete() suspend here until the test completes it - lets a
+     * test interleave a second action while the first call is still in flight. */
     var upsertGate: CompletableDeferred<Unit>? = null
+    var deleteGate: CompletableDeferred<Unit>? = null
 
     private var nextId = 1L
 
@@ -37,6 +38,8 @@ class FakeClothingItemLocalDataSource : ClothingItemLocalDataSource {
     }
 
     override suspend fun delete(id: Long): EmptyResult<DataError.Local> {
+        deleteGate?.await()
+        if (items.value.none { it.id == id }) return Result.Error(DataError.Local.NOT_FOUND)
         items.update { current -> current.filterNot { it.id == id } }
         return Result.Success(Unit)
     }

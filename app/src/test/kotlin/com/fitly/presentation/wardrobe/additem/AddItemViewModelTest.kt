@@ -1,5 +1,3 @@
-@file:OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-
 package com.fitly.presentation.wardrobe.additem
 
 import app.cash.turbine.test
@@ -14,34 +12,25 @@ import com.fitly.domain.util.DataError
 import com.fitly.fakes.FakeClothingItemLocalDataSource
 import com.fitly.fakes.FakeDominantColorExtractor
 import com.fitly.fakes.FakePhotoLocalDataSource
+import com.fitly.testutil.MainDispatcherExtension
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.RegisterExtension
 
 class AddItemViewModelTest {
 
-    private val testDispatcher = UnconfinedTestDispatcher()
+    companion object {
+        @JvmField
+        @RegisterExtension
+        val mainDispatcherExtension = MainDispatcherExtension()
+    }
+
     private val colorExtractor = FakeDominantColorExtractor(colorToReturn = 0xFF0000)
     private val photoDataSource = FakePhotoLocalDataSource(pathToReturn = "/photos/1.jpg")
     private val clothingItemDataSource = FakeClothingItemLocalDataSource()
 
     private val viewModel = AddItemViewModel(colorExtractor, photoDataSource, clothingItemDataSource)
-
-    @BeforeEach
-    fun setUp() {
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    @AfterEach
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     @Test
     fun `capturing a photo extracts its color and saves it, updating state`() = runTest {
