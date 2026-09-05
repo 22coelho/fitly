@@ -117,6 +117,7 @@ fun AddItemScreen(
                 selected = state.type,
                 optionLabel = { it.name },
                 onSelected = { it?.let { onAction(AddItemAction.OnTypeSelected(it)) } },
+                showAllOption = false,
             )
             FilterRow(
                 label = "Ocasião",
@@ -124,6 +125,7 @@ fun AddItemScreen(
                 selected = state.occasion,
                 optionLabel = { it.name },
                 onSelected = { it?.let { onAction(AddItemAction.OnOccasionSelected(it)) } },
+                showAllOption = false,
             )
             FilterRow(
                 label = "Estação",
@@ -131,6 +133,7 @@ fun AddItemScreen(
                 selected = state.season,
                 optionLabel = { it.name },
                 onSelected = { it?.let { onAction(AddItemAction.OnSeasonSelected(it)) } },
+                showAllOption = false,
             )
             FilterRow(
                 label = "Condição",
@@ -138,6 +141,7 @@ fun AddItemScreen(
                 selected = state.condition,
                 optionLabel = { it.name },
                 onSelected = { it?.let { onAction(AddItemAction.OnConditionSelected(it)) } },
+                showAllOption = false,
             )
 
             Button(

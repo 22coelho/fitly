@@ -86,6 +86,7 @@ fun ItemDetailScreen(
                 selected = state.type,
                 optionLabel = { it.name },
                 onSelected = { it?.let { onAction(ItemDetailAction.OnTypeChanged(it)) } },
+                showAllOption = false,
             )
             FilterRow(
                 label = "Ocasião",
@@ -93,6 +94,7 @@ fun ItemDetailScreen(
                 selected = state.occasion,
                 optionLabel = { it.name },
                 onSelected = { it?.let { onAction(ItemDetailAction.OnOccasionChanged(it)) } },
+                showAllOption = false,
             )
             FilterRow(
                 label = "Estação",
@@ -100,6 +102,7 @@ fun ItemDetailScreen(
                 selected = state.season,
                 optionLabel = { it.name },
                 onSelected = { it?.let { onAction(ItemDetailAction.OnSeasonChanged(it)) } },
+                showAllOption = false,
             )
             FilterRow(
                 label = "Condição",
@@ -107,6 +110,7 @@ fun ItemDetailScreen(
                 selected = state.condition,
                 optionLabel = { it.name },
                 onSelected = { it?.let { onAction(ItemDetailAction.OnConditionChanged(it)) } },
+                showAllOption = false,
             )
 
             Button(
