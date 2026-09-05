@@ -61,10 +61,53 @@ is why `WardrobeGraphRoute` exists as a marker separate from `WardrobeRoute`.
 
 ### Compose notes
 
-- Do **not** `import androidx.compose.foundation.layout.weight`. It resolves through the
-  `RowScope`/`ColumnScope` receiver; the explicit import fails to compile.
-- `FilterRow` takes `showAllOption`. Keep it `true` for real filters (Wardrobe, Home's occasion
-  picker) where "any value" is a genuine state; pass `false` on forms where the field is required.
+Do **not** `import androidx.compose.foundation.layout.weight`. It resolves through the
+`RowScope`/`ColumnScope` receiver; the explicit import fails to compile.
+
+## Design system
+
+Every screen builds from `presentation/designsystem/`, never from Material3 directly, and this is
+enforced by `DesignSystemBoundaryTest` (scans every `*Screen.kt` for a direct
+`androidx.compose.material3.*` import) — the only imports it lets through are `MaterialTheme`,
+`Text`, `Icon`, and `SnackbarHostState`, because none of those carry a shape, elevation, or colour
+role of their own. Wrap anything else, don't import it into a screen.
+
+- **The palette is generated, not hand-picked.** Six tonal palettes derived from a terracotta seed
+  (`Color.kt`), with two deliberate departures from the standard Material 3 tone mapping — both
+  measured against WCAG contrast, not eyeballed. Regenerate from the seed rather than hand-editing
+  a value; the reasoning and the departures are in
+  `docs/adr/0007-terracotta-palette-over-classic-material3.md`.
+- **Material 3 Expressive is not available**, and not just because of the ADR 0006 ceiling —
+  `material3:1.4.0` resolves fine without needing compileSdk 37, but `MaterialExpressiveTheme` and
+  `MotionScheme` are `internal` in that version, and forcing it drops the transitive
+  `material-icons-core` dependency and breaks every `Icons.Default.*`. Stayed on classic
+  `MaterialTheme`; see ADR 0007 before trying again.
+- **A domain enum becomes user-facing text in exactly one place**: `presentation/Labels.kt`
+  (`XEnum.labelRes: Int`, resolved via `stringResource`). `domain/` never sees a string resource;
+  the enum itself never knows a UI exists. `LabelsTest` guards against two values silently sharing
+  one resource (a copy-paste that would make every dress read as a shirt).
+- **`FilterRow` vs `FitlySegmentedRow`**: a required field with 3–4 values (Season, Condition) is a
+  `FitlySegmentedRow` — segmented reads as "pick exactly one", which a chip row does not. A
+  required field with 5 values (Type, Occasion) is a `FilterRow` with `showAllOption = false` — a
+  segmented row that wide gets unreadable on a phone. An actual filter (Wardrobe, Home's occasion
+  picker), where "any value" is a genuine state, is a `FilterRow` with `showAllOption = true`
+  (the default).
+- **`ClothingItemForm`** (`presentation/wardrobe/`) is the one form both Add item and Item detail
+  render — the same four fields over a blank item or an existing one. Don't fork it per screen.
+- **`ClothingPhoto`** paints its own letterbox from the item's extracted dominant colour
+  (`PhotoFit.Contain`, used wherever the photo doesn't fill its bounds) rather than leaving it
+  blank or default-grey — this is also what a photo-less `@Preview` falls back to, so previews
+  don't need real image files. `PhotoFit.Cover` (grids) skips the backdrop and crops instead.
+  `contentColorOn(background)` picks black-or-white ink by the WCAG formula for anything drawn on
+  top of a colour that can't be known ahead of time (the favourite heart over a garment photo);
+  `ContentColorTest` pins the one silent failure mode — a pale garment giving pale-on-pale ink.
+- **Previews use `preview/PreviewData.kt`**, kept in `main` (not `test`) because previews compile
+  against the main source set. Sample items carry no real photo path on purpose, to exercise the
+  dominant-colour fallback above.
+- **The large title on each tab** (`FitlyLargeTopAppBar`) collapses on scroll via
+  `rememberFitlyScrollBehavior()` + `Modifier.collapsingTopBar(behavior)` — both are needed, on the
+  app bar and the scrolling content respectively, or it won't collapse. `FitlyScrollBehavior` wraps
+  the experimental Material type so a screen never has to opt into it itself.
 
 ## Testing
 
@@ -83,6 +126,10 @@ use JUnit4, bridged by the vintage engine.
 - **Robolectric test classes need `@Config(application = Application::class)`**, otherwise Koin
   throws `KoinApplicationAlreadyStartedException` across classes.
 - Shared fixtures: `testutil/ClothingItemFixtures.kt` (`testClothingItem()`).
+- A few tests check the codebase itself rather than behaviour, so a rule in this file doesn't
+  quietly stop being true: `DesignSystemBoundaryTest` (see Design system, above), `LabelsTest`
+  (every enum value maps to a distinct string resource), `ContentColorTest` (the contrast picker's
+  known failure direction).
 
 ## Working agreements
 
@@ -95,4 +142,6 @@ use JUnit4, bridged by the vintage engine.
 - **Commits are fine; never push.** Do not add a `Co-Authored-By` trailer to commits in this repo.
 - **CameraX / in-app capture is deferred** and out of scope. Photos come from the Android Photo
   Picker. Do not start it without being asked.
-- UI is intentionally minimal for now — enough to prove the layers beneath it work.
+- **Keep this file current.** When a change introduces a pattern, a gotcha, a pinned version, or a
+  shared abstraction a future session would need, update the relevant section here as part of that
+  change — don't wait to be asked.
