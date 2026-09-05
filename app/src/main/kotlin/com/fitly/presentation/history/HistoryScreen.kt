@@ -42,8 +42,6 @@ import com.fitly.presentation.designsystem.FitlyScaffold
 import com.fitly.presentation.designsystem.FitlyTheme
 import com.fitly.presentation.designsystem.PhotoFit
 import com.fitly.presentation.designsystem.TagChip
-import com.fitly.presentation.designsystem.collapsingTopBar
-import com.fitly.presentation.designsystem.rememberFitlyScrollBehavior
 import com.fitly.presentation.labelRes
 import com.fitly.presentation.messageRes
 import com.fitly.presentation.preview.previewOutfit
@@ -75,14 +73,10 @@ fun HistoryScreen(
     onAction: (HistoryAction) -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
-    val scrollBehavior = rememberFitlyScrollBehavior()
-
     FitlyScaffold(
-        modifier = Modifier.collapsingTopBar(scrollBehavior),
         topBar = {
             FitlyLargeTopAppBar(
                 title = stringResource(R.string.history_title),
-                scrollBehavior = scrollBehavior,
             )
         },
         snackbarHostState = snackbarHostState,

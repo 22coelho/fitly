@@ -39,9 +39,7 @@ import com.fitly.presentation.designsystem.FitlyOutlinedButton
 import com.fitly.presentation.designsystem.FitlyScaffold
 import com.fitly.presentation.designsystem.FitlyTheme
 import com.fitly.presentation.designsystem.OutfitPreview
-import com.fitly.presentation.designsystem.collapsingTopBar
 import com.fitly.presentation.designsystem.contentColorOn
-import com.fitly.presentation.designsystem.rememberFitlyScrollBehavior
 import com.fitly.presentation.labelRes
 import com.fitly.presentation.messageRes
 import com.fitly.presentation.preview.previewOutfit
@@ -71,14 +69,10 @@ fun HomeScreen(
     onAction: (HomeAction) -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
-    val scrollBehavior = rememberFitlyScrollBehavior()
-
     FitlyScaffold(
-        modifier = Modifier.collapsingTopBar(scrollBehavior),
         topBar = {
             FitlyLargeTopAppBar(
                 title = stringResource(R.string.home_title),
-                scrollBehavior = scrollBehavior,
             )
         },
         snackbarHostState = snackbarHostState,

@@ -34,8 +34,6 @@ import com.fitly.presentation.designsystem.FitlyLargeTopAppBar
 import com.fitly.presentation.designsystem.FitlyScaffold
 import com.fitly.presentation.designsystem.FitlyTextButton
 import com.fitly.presentation.designsystem.FitlyTheme
-import com.fitly.presentation.designsystem.collapsingTopBar
-import com.fitly.presentation.designsystem.rememberFitlyScrollBehavior
 import com.fitly.presentation.labelRes
 import com.fitly.presentation.preview.previewClothingItems
 import org.koin.androidx.compose.koinViewModel
@@ -67,14 +65,10 @@ fun WardrobeScreen(
     onAction: (WardrobeAction) -> Unit,
     onAddItemClick: () -> Unit,
 ) {
-    val scrollBehavior = rememberFitlyScrollBehavior()
-
     FitlyScaffold(
-        modifier = Modifier.collapsingTopBar(scrollBehavior),
         topBar = {
             FitlyLargeTopAppBar(
                 title = stringResource(R.string.wardrobe_title),
-                scrollBehavior = scrollBehavior,
                 actions = {
                     FitlyTextButton(
                         text = filtersLabel(state.sheetFilterCount),

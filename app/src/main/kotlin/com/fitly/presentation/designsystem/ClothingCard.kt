@@ -1,6 +1,7 @@
 package com.fitly.presentation.designsystem
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,16 +34,21 @@ fun ClothingCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val shape = MaterialTheme.shapes.medium
     Column(
         modifier = modifier
-            .clip(MaterialTheme.shapes.medium)
+            .clip(shape)
+            // Outlines the whole cell, colour bar included, rather than letting ClothingPhoto
+            // outline only its own half of it.
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
             .clickable(onClick = onClick),
     ) {
         ClothingPhoto(
             photoPath = item.photoPath,
             dominantColor = item.dominantColor,
             fit = PhotoFit.Cover,
-            shape = MaterialTheme.shapes.medium,
+            shape = shape,
+            outlined = false,
             modifier = Modifier.fillMaxWidth(),
         )
         Box(

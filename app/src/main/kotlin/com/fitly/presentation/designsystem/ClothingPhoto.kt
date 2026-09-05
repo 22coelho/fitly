@@ -1,6 +1,7 @@
 package com.fitly.presentation.designsystem
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +37,10 @@ enum class PhotoFit {
  * With [PhotoFit.Contain] the letterbox is painted with the photo's own extracted dominant colour,
  * pulled most of the way towards the surface: at full strength it competes with the garment, and
  * left transparent it reads as a hole.
+ *
+ * A hairline outline keeps the photo's edge visible when the garment itself is close to the
+ * surface behind it - a near-black coat on the dark theme, a cream dress on the light one. Pass
+ * [outlined] as false when something else already draws the boundary, as [ClothingCard] does.
  */
 @Composable
 fun ClothingPhoto(
@@ -45,6 +50,7 @@ fun ClothingPhoto(
     aspectRatio: Float? = 3f / 4f,
     fit: PhotoFit = PhotoFit.Contain,
     shape: Shape = MaterialTheme.shapes.medium,
+    outlined: Boolean = true,
 ) {
     val surface = MaterialTheme.colorScheme.surfaceContainerHigh
     val backdrop = when {
@@ -55,7 +61,14 @@ fun ClothingPhoto(
         modifier = modifier
             .then(if (aspectRatio != null) Modifier.aspectRatio(aspectRatio) else Modifier)
             .clip(shape)
-            .background(backdrop),
+            .background(backdrop)
+            .then(
+                if (outlined) {
+                    Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
+                } else {
+                    Modifier
+                },
+            ),
     ) {
         if (photoPath != null) {
             AsyncImage(
