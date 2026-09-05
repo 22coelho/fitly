@@ -22,3 +22,23 @@ data class Outfit(
     val favorite: Boolean,
     val createdAt: Long,
 )
+
+/** An [Outfit] with its slot ids resolved to their [ClothingItem]s, for display. */
+data class ResolvedOutfit(
+    val outfitId: Long,
+    val top: ClothingItem,
+    val bottom: ClothingItem,
+    val shoes: ClothingItem,
+    val accessory: ClothingItem?,
+    val status: OutfitStatus,
+    val favorite: Boolean,
+)
+
+/** Null when a required slot's [ClothingItem] can no longer be found in [itemsById]. */
+fun Outfit.resolve(itemsById: Map<Long, ClothingItem>): ResolvedOutfit? {
+    val top = itemsById[topItemId] ?: return null
+    val bottom = itemsById[bottomItemId] ?: return null
+    val shoes = itemsById[shoesItemId] ?: return null
+    val accessory = accessoryItemId?.let { itemsById[it] }
+    return ResolvedOutfit(id, top, bottom, shoes, accessory, status, favorite)
+}
