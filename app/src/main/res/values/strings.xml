@@ -34,4 +34,11 @@
     <string name="error_disk_full">Não há espaço no dispositivo.</string>
     <string name="error_not_found">Não foi possível encontrar isso.</string>
     <string name="error_unknown">Algo correu mal.</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_back">Voltar</string>
+    <string name="cd_add_item">Adicionar peça</string>
+    <string name="cd_favorite">Marcar como favorito</string>
+    <string name="cd_unfavorite">Remover dos favoritos</string>
+    <string name="cd_clothing_photo">Foto da peça</string>
 </resources>

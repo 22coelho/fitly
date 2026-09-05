@@ -75,21 +75,21 @@ fun WardrobeScreen(
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             FilterRow(
-                label = "Tipo",
+                allLabel = "Tipo: todos",
                 options = ClothingType.entries,
                 selected = state.typeFilter,
                 optionLabel = { it.labelRes },
                 onSelected = { onAction(WardrobeAction.OnTypeFilterSelected(it)) },
             )
             FilterRow(
-                label = "Ocasião",
+                allLabel = "Ocasião: todos",
                 options = Occasion.entries,
                 selected = state.occasionFilter,
                 optionLabel = { it.labelRes },
                 onSelected = { onAction(WardrobeAction.OnOccasionFilterSelected(it)) },
             )
             FilterRow(
-                label = "Estação",
+                allLabel = "Estação: todos",
                 options = Season.entries,
                 selected = state.seasonFilter,
                 optionLabel = { it.labelRes },
@@ -116,7 +116,7 @@ private fun ClothingItemRow(item: ClothingItem, onClick: () -> Unit) {
     ListItem(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
         leadingContent = {
-            ClothingPhoto(photoPath = item.photoPath, modifier = Modifier.size(56.dp))
+            ClothingPhoto(photoPath = item.photoPath, dominantColor = item.dominantColor, modifier = Modifier.size(56.dp))
         },
         headlineContent = { Text(stringResource(item.type.labelRes)) },
         supportingContent = {

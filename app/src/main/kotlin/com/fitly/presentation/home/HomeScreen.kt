@@ -75,7 +75,7 @@ fun HomeScreen(
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             FilterRow(
-                label = "Ocasião",
+                allLabel = "Ocasião: todos",
                 options = Occasion.entries,
                 selected = state.occasionFilter,
                 optionLabel = { it.labelRes },
@@ -109,7 +109,7 @@ private fun OutfitCard(outfit: ResolvedOutfit, onAction: (HomeAction) -> Unit) {
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
             listOfNotNull(outfit.top, outfit.bottom, outfit.shoes, outfit.accessory).forEach { item ->
-                ClothingPhoto(photoPath = item.photoPath, modifier = Modifier.weight(1f).height(120.dp))
+                ClothingPhoto(photoPath = item.photoPath, dominantColor = item.dominantColor, modifier = Modifier.weight(1f).height(120.dp))
             }
         }
         IconButton(

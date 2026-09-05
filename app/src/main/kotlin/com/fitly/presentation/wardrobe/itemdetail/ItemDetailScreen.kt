@@ -82,10 +82,10 @@ fun ItemDetailScreen(
             modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            ClothingPhoto(photoPath = state.photoPath, modifier = Modifier.fillMaxWidth().height(200.dp))
+            ClothingPhoto(photoPath = state.photoPath, dominantColor = null, modifier = Modifier.fillMaxWidth().height(200.dp))
 
             FilterRow(
-                label = "Tipo",
+                allLabel = "Tipo: todos",
                 options = ClothingType.entries,
                 selected = state.type,
                 optionLabel = { it.labelRes },
@@ -93,7 +93,7 @@ fun ItemDetailScreen(
                 showAllOption = false,
             )
             FilterRow(
-                label = "Ocasião",
+                allLabel = "Ocasião: todos",
                 options = Occasion.entries,
                 selected = state.occasion,
                 optionLabel = { it.labelRes },
@@ -101,7 +101,7 @@ fun ItemDetailScreen(
                 showAllOption = false,
             )
             FilterRow(
-                label = "Estação",
+                allLabel = "Estação: todos",
                 options = Season.entries,
                 selected = state.season,
                 optionLabel = { it.labelRes },
@@ -109,7 +109,7 @@ fun ItemDetailScreen(
                 showAllOption = false,
             )
             FilterRow(
-                label = "Condição",
+                allLabel = "Condição: todos",
                 options = Condition.entries,
                 selected = state.condition,
                 optionLabel = { it.labelRes },

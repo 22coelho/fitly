@@ -19,6 +19,7 @@ fun FitlyTheme(
 ) {
     MaterialTheme(
         colorScheme = if (darkTheme) FitlyDarkColors else FitlyLightColors,
+        shapes = FitlyShapes,
         typography = FitlyTypography,
         content = content,
     )

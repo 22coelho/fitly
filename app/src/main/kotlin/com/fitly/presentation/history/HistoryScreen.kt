@@ -99,7 +99,7 @@ private fun HistoryOutfitRow(outfit: ResolvedOutfit, onAction: (HistoryAction) -
         leadingContent = {
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 listOfNotNull(outfit.top, outfit.bottom, outfit.shoes, outfit.accessory).forEach { item ->
-                    ClothingPhoto(photoPath = item.photoPath, modifier = Modifier.size(48.dp))
+                    ClothingPhoto(photoPath = item.photoPath, dominantColor = item.dominantColor, modifier = Modifier.size(48.dp))
                 }
             }
         },
