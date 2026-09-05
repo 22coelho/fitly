@@ -1,3 +1,37 @@
 <resources>
     <string name="app_name">fitly</string>
+
+    <!-- ClothingType -->
+    <string name="type_top">Parte de cima</string>
+    <string name="type_bottom">Parte de baixo</string>
+    <string name="type_shoes">Sapatos</string>
+    <string name="type_dress">Vestido</string>
+    <string name="type_accessory">Acessório</string>
+
+    <!-- Occasion. Wording fixed by CONTEXT.md. -->
+    <string name="occasion_casual">Casual</string>
+    <string name="occasion_work">Trabalho</string>
+    <string name="occasion_sport">Desporto</string>
+    <string name="occasion_formal">Formal</string>
+    <string name="occasion_date">Encontro</string>
+
+    <!-- Season -->
+    <string name="season_summer">Verão</string>
+    <string name="season_winter">Inverno</string>
+    <string name="season_all_year">Todo o ano</string>
+
+    <!-- Condition. Feminine: these describe "uma peça". -->
+    <string name="condition_new">Nova</string>
+    <string name="condition_good">Boa</string>
+    <string name="condition_worn">Gasta</string>
+
+    <!-- OutfitStatus -->
+    <string name="status_accepted">Aceite</string>
+    <string name="status_rejected">Rejeitado</string>
+    <string name="status_pending">Por decidir</string>
+
+    <!-- DataError.Local -->
+    <string name="error_disk_full">Não há espaço no dispositivo.</string>
+    <string name="error_not_found">Não foi possível encontrar isso.</string>
+    <string name="error_unknown">Algo correu mal.</string>
 </resources>

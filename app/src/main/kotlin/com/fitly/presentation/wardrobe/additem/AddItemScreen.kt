@@ -5,6 +5,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +30,8 @@ import com.fitly.domain.model.ClothingType
 import com.fitly.domain.model.Condition
 import com.fitly.domain.model.Occasion
 import com.fitly.domain.model.Season
+import com.fitly.presentation.labelRes
+import com.fitly.presentation.messageRes
 import com.fitly.presentation.ObserveAsEvents
 import com.fitly.presentation.designsystem.ClothingPhoto
 import com.fitly.presentation.designsystem.FilterRow
@@ -75,7 +78,7 @@ fun AddItemRoot(
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             AddItemEvent.ItemSaved -> onNavigateBack()
-            is AddItemEvent.ShowError -> scope.launch { snackbarHostState.showSnackbar(event.error.name) }
+            is AddItemEvent.ShowError -> scope.launch { snackbarHostState.showSnackbar(context.getString(event.error.messageRes)) }
         }
     }
 
@@ -97,6 +100,8 @@ fun AddItemScreen(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     Scaffold(
+        // Insets belong to the host Scaffold in MainActivity; adding them here doubles them.
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
@@ -115,7 +120,7 @@ fun AddItemScreen(
                 label = "Tipo",
                 options = ClothingType.entries,
                 selected = state.type,
-                optionLabel = { it.name },
+                optionLabel = { it.labelRes },
                 onSelected = { it?.let { onAction(AddItemAction.OnTypeSelected(it)) } },
                 showAllOption = false,
             )
@@ -123,7 +128,7 @@ fun AddItemScreen(
                 label = "Ocasião",
                 options = Occasion.entries,
                 selected = state.occasion,
-                optionLabel = { it.name },
+                optionLabel = { it.labelRes },
                 onSelected = { it?.let { onAction(AddItemAction.OnOccasionSelected(it)) } },
                 showAllOption = false,
             )
@@ -131,7 +136,7 @@ fun AddItemScreen(
                 label = "Estação",
                 options = Season.entries,
                 selected = state.season,
-                optionLabel = { it.name },
+                optionLabel = { it.labelRes },
                 onSelected = { it?.let { onAction(AddItemAction.OnSeasonSelected(it)) } },
                 showAllOption = false,
             )
@@ -139,7 +144,7 @@ fun AddItemScreen(
                 label = "Condição",
                 options = Condition.entries,
                 selected = state.condition,
-                optionLabel = { it.name },
+                optionLabel = { it.labelRes },
                 onSelected = { it?.let { onAction(AddItemAction.OnConditionSelected(it)) } },
                 showAllOption = false,
             )

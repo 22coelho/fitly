@@ -1,5 +1,6 @@
 package com.fitly.presentation.designsystem
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyRow
@@ -7,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
 /**
@@ -19,7 +21,7 @@ fun <T> FilterRow(
     label: String,
     options: List<T>,
     selected: T?,
-    optionLabel: (T) -> String,
+    @StringRes optionLabel: (T) -> Int,
     onSelected: (T?) -> Unit,
     showAllOption: Boolean = true,
 ) {
@@ -40,7 +42,7 @@ fun <T> FilterRow(
             FilterChip(
                 selected = selected == option,
                 onClick = { onSelected(option) },
-                label = { Text(optionLabel(option)) },
+                label = { Text(stringResource(optionLabel(option))) },
             )
         }
     }

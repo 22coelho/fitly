@@ -3,6 +3,7 @@ package com.fitly.presentation.wardrobe
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -28,6 +30,7 @@ import com.fitly.domain.model.ClothingItem
 import com.fitly.domain.model.ClothingType
 import com.fitly.domain.model.Occasion
 import com.fitly.domain.model.Season
+import com.fitly.presentation.labelRes
 import com.fitly.presentation.ObserveAsEvents
 import com.fitly.presentation.designsystem.ClothingPhoto
 import com.fitly.presentation.designsystem.FilterRow
@@ -62,6 +65,8 @@ fun WardrobeScreen(
     onAddItemClick: () -> Unit,
 ) {
     Scaffold(
+        // Insets belong to the host Scaffold in MainActivity; adding them here doubles them.
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
             FloatingActionButton(onClick = onAddItemClick) {
                 Icon(Icons.Default.Add, contentDescription = "Adicionar peça")
@@ -73,21 +78,21 @@ fun WardrobeScreen(
                 label = "Tipo",
                 options = ClothingType.entries,
                 selected = state.typeFilter,
-                optionLabel = { it.name },
+                optionLabel = { it.labelRes },
                 onSelected = { onAction(WardrobeAction.OnTypeFilterSelected(it)) },
             )
             FilterRow(
                 label = "Ocasião",
                 options = Occasion.entries,
                 selected = state.occasionFilter,
-                optionLabel = { it.name },
+                optionLabel = { it.labelRes },
                 onSelected = { onAction(WardrobeAction.OnOccasionFilterSelected(it)) },
             )
             FilterRow(
                 label = "Estação",
                 options = Season.entries,
                 selected = state.seasonFilter,
-                optionLabel = { it.name },
+                optionLabel = { it.labelRes },
                 onSelected = { onAction(WardrobeAction.OnSeasonFilterSelected(it)) },
             )
 
@@ -113,8 +118,14 @@ private fun ClothingItemRow(item: ClothingItem, onClick: () -> Unit) {
         leadingContent = {
             ClothingPhoto(photoPath = item.photoPath, modifier = Modifier.size(56.dp))
         },
-        headlineContent = { Text(item.type.name) },
-        supportingContent = { Text("${item.occasion.name} • ${item.season.name} • ${item.condition.name}") },
+        headlineContent = { Text(stringResource(item.type.labelRes)) },
+        supportingContent = {
+            Text(
+                stringResource(item.occasion.labelRes) + " • " +
+                    stringResource(item.season.labelRes) + " • " +
+                    stringResource(item.condition.labelRes),
+            )
+        },
     )
 }
 

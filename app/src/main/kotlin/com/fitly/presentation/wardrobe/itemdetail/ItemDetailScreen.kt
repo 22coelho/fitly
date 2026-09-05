@@ -2,6 +2,7 @@ package com.fitly.presentation.wardrobe.itemdetail
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +26,7 @@ import com.fitly.domain.model.ClothingType
 import com.fitly.domain.model.Condition
 import com.fitly.domain.model.Occasion
 import com.fitly.domain.model.Season
+import com.fitly.presentation.labelRes
 import com.fitly.presentation.ObserveAsEvents
 import com.fitly.presentation.designsystem.ClothingPhoto
 import com.fitly.presentation.designsystem.FilterRow
@@ -64,6 +66,8 @@ fun ItemDetailScreen(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     Scaffold(
+        // Insets belong to the host Scaffold in MainActivity; adding them here doubles them.
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         if (state.isNotFound) {
@@ -84,7 +88,7 @@ fun ItemDetailScreen(
                 label = "Tipo",
                 options = ClothingType.entries,
                 selected = state.type,
-                optionLabel = { it.name },
+                optionLabel = { it.labelRes },
                 onSelected = { it?.let { onAction(ItemDetailAction.OnTypeChanged(it)) } },
                 showAllOption = false,
             )
@@ -92,7 +96,7 @@ fun ItemDetailScreen(
                 label = "Ocasião",
                 options = Occasion.entries,
                 selected = state.occasion,
-                optionLabel = { it.name },
+                optionLabel = { it.labelRes },
                 onSelected = { it?.let { onAction(ItemDetailAction.OnOccasionChanged(it)) } },
                 showAllOption = false,
             )
@@ -100,7 +104,7 @@ fun ItemDetailScreen(
                 label = "Estação",
                 options = Season.entries,
                 selected = state.season,
-                optionLabel = { it.name },
+                optionLabel = { it.labelRes },
                 onSelected = { it?.let { onAction(ItemDetailAction.OnSeasonChanged(it)) } },
                 showAllOption = false,
             )
@@ -108,7 +112,7 @@ fun ItemDetailScreen(
                 label = "Condição",
                 options = Condition.entries,
                 selected = state.condition,
-                optionLabel = { it.name },
+                optionLabel = { it.labelRes },
                 onSelected = { it?.let { onAction(ItemDetailAction.OnConditionChanged(it)) } },
                 showAllOption = false,
             )

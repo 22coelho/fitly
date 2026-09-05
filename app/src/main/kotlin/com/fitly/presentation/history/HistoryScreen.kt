@@ -2,6 +2,7 @@ package com.fitly.presentation.history
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +27,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,6 +39,8 @@ import com.fitly.domain.model.Occasion
 import com.fitly.domain.model.OutfitStatus
 import com.fitly.domain.model.ResolvedOutfit
 import com.fitly.domain.model.Season
+import com.fitly.presentation.labelRes
+import com.fitly.presentation.messageRes
 import com.fitly.presentation.ObserveAsEvents
 import com.fitly.presentation.designsystem.ClothingPhoto
 import com.fitly.presentation.designsystem.FitlyTheme
@@ -45,12 +50,13 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun HistoryRoot(viewModel: HistoryViewModel = koinViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            is HistoryEvent.ShowError -> scope.launch { snackbarHostState.showSnackbar(event.error.name) }
+            is HistoryEvent.ShowError -> scope.launch { snackbarHostState.showSnackbar(context.getString(event.error.messageRes)) }
         }
     }
 
@@ -64,6 +70,8 @@ fun HistoryScreen(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     Scaffold(
+        // Insets belong to the host Scaffold in MainActivity; adding them here doubles them.
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         if (state.outfits.isEmpty()) {
@@ -95,7 +103,7 @@ private fun HistoryOutfitRow(outfit: ResolvedOutfit, onAction: (HistoryAction) -
                 }
             }
         },
-        headlineContent = { Text(outfit.status.name) },
+        headlineContent = { Text(stringResource(outfit.status.labelRes)) },
         trailingContent = {
             IconButton(onClick = { onAction(HistoryAction.OnFavoriteToggle(outfit.outfitId)) }) {
                 Icon(
