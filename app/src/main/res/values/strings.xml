@@ -35,6 +35,52 @@
     <string name="error_not_found">Não foi possível encontrar isso.</string>
     <string name="error_unknown">Algo correu mal.</string>
 
+    <!-- Screens -->
+    <string name="wardrobe_title">Wardrobe</string>
+    <string name="home_title">O que vestes hoje?</string>
+    <string name="history_title">Histórico</string>
+    <string name="add_item_title">Nova peça</string>
+    <string name="item_detail_title">Editar peça</string>
+
+    <!-- Filters -->
+    <string name="filters_title">Filtros</string>
+    <string name="filters_title_with_count">Filtros (%1$d)</string>
+    <string name="filter_type">Tipo</string>
+    <string name="filter_occasion">Ocasião</string>
+    <string name="filter_season">Estação</string>
+    <string name="filter_condition">Condição</string>
+    <string name="filter_type_all">Todos os tipos</string>
+    <string name="filter_occasion_all">Todas</string>
+    <string name="filter_season_all">Todas</string>
+
+    <!-- Empty states -->
+    <string name="wardrobe_empty_title">Wardrobe vazia</string>
+    <string name="wardrobe_empty_body">Adiciona a primeira peça para começares a receber sugestões.</string>
+    <string name="wardrobe_no_matches_body">Nenhuma peça corresponde aos filtros escolhidos.</string>
+    <string name="wardrobe_add_first">Adicionar peça</string>
+    <string name="home_empty_title">Pronto para escolher</string>
+    <string name="home_empty_body">Toca em Gerar para veres uma sugestão.</string>
+    <string name="home_not_enough_title">Faltam peças</string>
+    <string name="home_not_enough_body">Precisas de pelo menos uma peça de cima, uma de baixo e uns sapatos.</string>
+    <string name="home_go_to_wardrobe">Ir à wardrobe</string>
+    <string name="history_empty_title">Sem histórico</string>
+    <string name="history_empty_body">Os outfits que aceitares ou rejeitares aparecem aqui.</string>
+
+    <!-- Actions -->
+    <string name="action_generate">Gerar outfit</string>
+    <string name="action_accept">Aceitar</string>
+    <string name="action_reject">Rejeitar</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_delete">Apagar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_pick_photo">Escolher foto</string>
+    <string name="action_change_photo">Trocar foto</string>
+    <string name="delete_title">Apagar esta peça?</string>
+    <string name="delete_body">Esta ação não pode ser desfeita.</string>
+    <string name="favorites_only">Só favoritos</string>
+    <string name="accessory_label">com acessório</string>
+    <string name="item_not_found">Peça não encontrada.</string>
+
     <!-- Content descriptions -->
     <string name="cd_back">Voltar</string>
     <string name="cd_add_item">Adicionar peça</string>

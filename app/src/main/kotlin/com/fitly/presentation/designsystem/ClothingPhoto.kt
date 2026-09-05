@@ -30,7 +30,8 @@ enum class PhotoFit {
 
 /**
  * A ClothingItem's photo at a fixed [aspectRatio], so rows and grids line up regardless of what
- * the Photo Picker handed back.
+ * the Photo Picker handed back. Pass `null` to fill whatever bounds the caller gives instead -
+ * what a stacked outfit needs, where the three garments have to share one screen's height.
  *
  * With [PhotoFit.Contain] the letterbox is painted with the photo's own extracted dominant colour,
  * pulled most of the way towards the surface: at full strength it competes with the garment, and
@@ -41,7 +42,7 @@ fun ClothingPhoto(
     photoPath: String?,
     dominantColor: Int?,
     modifier: Modifier = Modifier,
-    aspectRatio: Float = 3f / 4f,
+    aspectRatio: Float? = 3f / 4f,
     fit: PhotoFit = PhotoFit.Contain,
     shape: Shape = MaterialTheme.shapes.medium,
 ) {
@@ -52,7 +53,7 @@ fun ClothingPhoto(
     }
     Box(
         modifier = modifier
-            .aspectRatio(aspectRatio)
+            .then(if (aspectRatio != null) Modifier.aspectRatio(aspectRatio) else Modifier)
             .clip(shape)
             .background(backdrop),
     ) {

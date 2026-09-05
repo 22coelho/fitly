@@ -2,6 +2,8 @@ package com.fitly.presentation.wardrobe
 
 import app.cash.turbine.test
 import assertk.assertThat
+import assertk.assertions.isTrue
+import assertk.assertions.isFalse
 import assertk.assertions.containsExactly
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
@@ -116,6 +118,40 @@ class WardrobeViewModelTest {
         viewModel.events.test {
             viewModel.onAction(WardrobeAction.OnItemClick(saved.data))
             assertThat(awaitItem()).isEqualTo(WardrobeEvent.NavigateToItemDetail(saved.data))
+        }
+    }
+
+    @Test
+    fun `the filters sheet opens and closes`() = runTest {
+        val viewModel = WardrobeViewModel(FakeClothingItemLocalDataSource())
+
+        viewModel.state.test {
+            assertThat(awaitItem().filtersVisible).isFalse()
+
+            viewModel.onAction(WardrobeAction.OnFiltersClick)
+            assertThat(awaitItem().filtersVisible).isTrue()
+
+            viewModel.onAction(WardrobeAction.OnFiltersDismiss)
+            assertThat(awaitItem().filtersVisible).isFalse()
+        }
+    }
+
+    @Test
+    fun `the sheet counts only the filters it owns`() = runTest {
+        val viewModel = WardrobeViewModel(FakeClothingItemLocalDataSource())
+
+        viewModel.state.test {
+            awaitItem()
+
+            // Type lives on the screen itself, so it must not show up in the sheet's badge.
+            viewModel.onAction(WardrobeAction.OnTypeFilterSelected(ClothingType.SHOES))
+            assertThat(awaitItem().sheetFilterCount).isEqualTo(0)
+
+            viewModel.onAction(WardrobeAction.OnSeasonFilterSelected(Season.WINTER))
+            assertThat(awaitItem().sheetFilterCount).isEqualTo(1)
+
+            viewModel.onAction(WardrobeAction.OnOccasionFilterSelected(Occasion.WORK))
+            assertThat(awaitItem().sheetFilterCount).isEqualTo(2)
         }
     }
 }

@@ -1,24 +1,20 @@
 package com.fitly.presentation.history
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,23 +23,32 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.fitly.domain.model.ClothingItem
-import com.fitly.domain.model.ClothingType
-import com.fitly.domain.model.Condition
-import com.fitly.domain.model.Occasion
+import com.fitly.R
 import com.fitly.domain.model.OutfitStatus
 import com.fitly.domain.model.ResolvedOutfit
-import com.fitly.domain.model.Season
-import com.fitly.presentation.labelRes
-import com.fitly.presentation.messageRes
 import com.fitly.presentation.ObserveAsEvents
 import com.fitly.presentation.designsystem.ClothingPhoto
+import com.fitly.presentation.designsystem.EmptyState
+import com.fitly.presentation.designsystem.FitlyCard
+import com.fitly.presentation.designsystem.FitlyChip
+import com.fitly.presentation.designsystem.FitlyIconButton
+import com.fitly.presentation.designsystem.FitlyLargeTopAppBar
+import com.fitly.presentation.designsystem.FitlyScaffold
 import com.fitly.presentation.designsystem.FitlyTheme
+import com.fitly.presentation.designsystem.PhotoFit
+import com.fitly.presentation.designsystem.TagChip
+import com.fitly.presentation.designsystem.collapsingTopBar
+import com.fitly.presentation.designsystem.rememberFitlyScrollBehavior
+import com.fitly.presentation.labelRes
+import com.fitly.presentation.messageRes
+import com.fitly.presentation.preview.previewOutfit
+import java.text.DateFormat
+import java.util.Date
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -56,7 +61,8 @@ fun HistoryRoot(viewModel: HistoryViewModel = koinViewModel()) {
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            is HistoryEvent.ShowError -> scope.launch { snackbarHostState.showSnackbar(context.getString(event.error.messageRes)) }
+            is HistoryEvent.ShowError ->
+                scope.launch { snackbarHostState.showSnackbar(context.getString(event.error.messageRes)) }
         }
     }
 
@@ -69,50 +75,112 @@ fun HistoryScreen(
     onAction: (HistoryAction) -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
-    Scaffold(
-        // Insets belong to the host Scaffold in MainActivity; adding them here doubles them.
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { padding ->
-        if (state.outfits.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("Ainda não há outfits no histórico.")
-            }
-            return@Scaffold
-        }
+    val scrollBehavior = rememberFitlyScrollBehavior()
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(vertical = 8.dp),
-        ) {
-            items(state.outfits, key = { it.outfitId }) { outfit ->
-                HistoryOutfitRow(outfit = outfit, onAction = onAction)
+    FitlyScaffold(
+        modifier = Modifier.collapsingTopBar(scrollBehavior),
+        topBar = {
+            FitlyLargeTopAppBar(
+                title = stringResource(R.string.history_title),
+                scrollBehavior = scrollBehavior,
+            )
+        },
+        snackbarHostState = snackbarHostState,
+    ) { padding ->
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            // The only place favourites lead anywhere. The flag is on the Outfit, so this is the
+            // only screen where filtering by it means anything.
+            FitlyChip(
+                text = stringResource(R.string.favorites_only),
+                selected = state.favoritesOnly,
+                onClick = { onAction(HistoryAction.OnFavoritesOnlyToggle) },
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            )
+
+            if (state.visibleOutfits.isEmpty()) {
+                EmptyState(
+                    icon = Icons.Default.DateRange,
+                    title = stringResource(R.string.history_empty_title),
+                    supportingText = stringResource(R.string.history_empty_body),
+                )
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    items(state.visibleOutfits, key = { it.outfitId }) { outfit ->
+                        HistoryOutfitCard(outfit = outfit, onAction = onAction)
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun HistoryOutfitRow(outfit: ResolvedOutfit, onAction: (HistoryAction) -> Unit) {
-    ListItem(
-        modifier = Modifier.fillMaxWidth(),
-        leadingContent = {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                listOfNotNull(outfit.top, outfit.bottom, outfit.shoes, outfit.accessory).forEach { item ->
-                    ClothingPhoto(photoPath = item.photoPath, dominantColor = item.dominantColor, modifier = Modifier.size(48.dp))
-                }
-            }
-        },
-        headlineContent = { Text(stringResource(outfit.status.labelRes)) },
-        trailingContent = {
-            IconButton(onClick = { onAction(HistoryAction.OnFavoriteToggle(outfit.outfitId)) }) {
-                Icon(
-                    imageVector = if (outfit.favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = "Favorito",
+private fun HistoryOutfitCard(outfit: ResolvedOutfit, onAction: (HistoryAction) -> Unit) {
+    FitlyCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            listOfNotNull(
+                outfit.top,
+                outfit.bottom.takeIf { it.id != outfit.top.id },
+                outfit.shoes,
+                outfit.accessory,
+            ).forEach { item ->
+                ClothingPhoto(
+                    photoPath = item.photoPath,
+                    dominantColor = item.dominantColor,
+                    fit = PhotoFit.Cover,
+                    shape = MaterialTheme.shapes.small,
+                    modifier = Modifier.width(72.dp),
                 )
             }
-        },
-    )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 4.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            TagChip(text = stringResource(outfit.status.labelRes))
+            Text(
+                text = formatDate(outfit.createdAt),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            FitlyIconButton(
+                icon = if (outfit.favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = stringResource(
+                    if (outfit.favorite) R.string.cd_unfavorite else R.string.cd_favorite,
+                ),
+                onClick = { onAction(HistoryAction.OnFavoriteToggle(outfit.outfitId)) },
+            )
+        }
+    }
+}
+
+/** The device's own short date format, so it follows the user's locale rather than ours. */
+private fun formatDate(epochMillis: Long): String =
+    DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(epochMillis))
+
+@Preview
+@Composable
+private fun HistoryScreenPreview() {
+    FitlyTheme {
+        HistoryScreen(
+            state = HistoryState(
+                outfits = listOf(
+                    previewOutfit(favorite = true, status = OutfitStatus.ACCEPTED),
+                    previewOutfit(withAccessory = false, status = OutfitStatus.REJECTED)
+                        .copy(outfitId = 2L),
+                ),
+            ),
+            onAction = {},
+        )
+    }
 }
 
 @Preview
@@ -120,37 +188,5 @@ private fun HistoryOutfitRow(outfit: ResolvedOutfit, onAction: (HistoryAction) -
 private fun HistoryScreenEmptyPreview() {
     FitlyTheme {
         HistoryScreen(state = HistoryState(), onAction = {})
-    }
-}
-
-@Preview
-@Composable
-private fun HistoryScreenWithOutfitsPreview() {
-    val item = ClothingItem(
-        photoPath = "",
-        dominantColor = 0xFFFF0000.toInt(),
-        type = ClothingType.TOP,
-        occasion = Occasion.CASUAL,
-        season = Season.ALL_YEAR,
-        condition = Condition.NEW,
-        createdAt = 0L,
-    )
-    FitlyTheme {
-        HistoryScreen(
-            state = HistoryState(
-                outfits = listOf(
-                    ResolvedOutfit(
-                        outfitId = 1L,
-                        top = item.copy(type = ClothingType.TOP),
-                        bottom = item.copy(type = ClothingType.BOTTOM),
-                        shoes = item.copy(type = ClothingType.SHOES),
-                        accessory = null,
-                        status = OutfitStatus.ACCEPTED,
-                        favorite = true,
-                    ),
-                ),
-            ),
-            onAction = {},
-        )
     }
 }

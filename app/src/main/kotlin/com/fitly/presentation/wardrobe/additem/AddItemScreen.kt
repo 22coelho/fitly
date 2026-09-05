@@ -3,29 +3,24 @@ package com.fitly.presentation.wardrobe.additem
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.fitly.R
 import com.fitly.domain.model.ClothingType
 import com.fitly.domain.model.Condition
 import com.fitly.domain.model.Occasion
@@ -33,9 +28,11 @@ import com.fitly.domain.model.Season
 import com.fitly.presentation.labelRes
 import com.fitly.presentation.messageRes
 import com.fitly.presentation.ObserveAsEvents
-import com.fitly.presentation.designsystem.ClothingPhoto
-import com.fitly.presentation.designsystem.FilterRow
+import com.fitly.presentation.designsystem.FitlyButton
+import com.fitly.presentation.designsystem.FitlyScaffold
 import com.fitly.presentation.designsystem.FitlyTheme
+import com.fitly.presentation.designsystem.FitlyTopAppBar
+import com.fitly.presentation.wardrobe.ClothingItemForm
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -88,6 +85,7 @@ fun AddItemRoot(
         onPickPhotoClick = {
             pickPhotoLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         },
+        onBackClick = onNavigateBack,
         snackbarHostState = snackbarHostState,
     )
 }
@@ -97,65 +95,46 @@ fun AddItemScreen(
     state: AddItemState,
     onAction: (AddItemAction) -> Unit,
     onPickPhotoClick: () -> Unit,
+    onBackClick: () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
-    Scaffold(
-        // Insets belong to the host Scaffold in MainActivity; adding them here doubles them.
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+    FitlyScaffold(
+        topBar = {
+            FitlyTopAppBar(
+                title = stringResource(R.string.add_item_title),
+                onBackClick = onBackClick,
+            )
+        },
+        snackbarHostState = snackbarHostState,
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(vertical = 16.dp),
         ) {
-            ClothingPhoto(photoPath = state.photoPath, dominantColor = null, modifier = Modifier.fillMaxWidth().height(200.dp))
-            if (state.isProcessingPhoto) {
-                CircularProgressIndicator()
-            }
-            OutlinedButton(onClick = onPickPhotoClick, modifier = Modifier.fillMaxWidth()) {
-                Text(if (state.photoPath == null) "Escolher foto" else "Trocar foto")
-            }
-
-            FilterRow(
-                allLabel = "Tipo: todos",
-                options = ClothingType.entries,
-                selected = state.type,
-                optionLabel = { it.labelRes },
-                onSelected = { it?.let { onAction(AddItemAction.OnTypeSelected(it)) } },
-                showAllOption = false,
-            )
-            FilterRow(
-                allLabel = "Ocasião: todos",
-                options = Occasion.entries,
-                selected = state.occasion,
-                optionLabel = { it.labelRes },
-                onSelected = { it?.let { onAction(AddItemAction.OnOccasionSelected(it)) } },
-                showAllOption = false,
-            )
-            FilterRow(
-                allLabel = "Estação: todos",
-                options = Season.entries,
-                selected = state.season,
-                optionLabel = { it.labelRes },
-                onSelected = { it?.let { onAction(AddItemAction.OnSeasonSelected(it)) } },
-                showAllOption = false,
-            )
-            FilterRow(
-                allLabel = "Condição: todos",
-                options = Condition.entries,
-                selected = state.condition,
-                optionLabel = { it.labelRes },
-                onSelected = { it?.let { onAction(AddItemAction.OnConditionSelected(it)) } },
-                showAllOption = false,
+            ClothingItemForm(
+                photoPath = state.photoPath,
+                dominantColor = state.dominantColor,
+                type = state.type,
+                occasion = state.occasion,
+                season = state.season,
+                condition = state.condition,
+                isProcessingPhoto = state.isProcessingPhoto,
+                onPickPhotoClick = onPickPhotoClick,
+                onTypeSelected = { onAction(AddItemAction.OnTypeSelected(it)) },
+                onOccasionSelected = { onAction(AddItemAction.OnOccasionSelected(it)) },
+                onSeasonSelected = { onAction(AddItemAction.OnSeasonSelected(it)) },
+                onConditionSelected = { onAction(AddItemAction.OnConditionSelected(it)) },
             )
 
-            Button(
+            FitlyButton(
+                text = stringResource(R.string.action_save),
                 onClick = { onAction(AddItemAction.OnSaveClick) },
                 enabled = state.canSave,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text("Guardar")
-            }
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+            )
         }
     }
 }
@@ -164,6 +143,16 @@ fun AddItemScreen(
 @Composable
 private fun AddItemScreenPreview() {
     FitlyTheme {
-        AddItemScreen(state = AddItemState(), onAction = {}, onPickPhotoClick = {})
+        AddItemScreen(
+            state = AddItemState(
+                type = ClothingType.TOP,
+                occasion = Occasion.CASUAL,
+                season = Season.ALL_YEAR,
+                condition = Condition.NEW,
+            ),
+            onAction = {},
+            onPickPhotoClick = {},
+            onBackClick = {},
+        )
     }
 }

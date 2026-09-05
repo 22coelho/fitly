@@ -37,6 +37,8 @@ class WardrobeViewModel(
             is WardrobeAction.OnTypeFilterSelected -> _state.update { it.copy(typeFilter = action.type) }
             is WardrobeAction.OnOccasionFilterSelected -> _state.update { it.copy(occasionFilter = action.occasion) }
             is WardrobeAction.OnSeasonFilterSelected -> _state.update { it.copy(seasonFilter = action.season) }
+            WardrobeAction.OnFiltersClick -> _state.update { it.copy(filtersVisible = true) }
+            WardrobeAction.OnFiltersDismiss -> _state.update { it.copy(filtersVisible = false) }
             WardrobeAction.OnClearFilters -> _state.update {
                 it.copy(typeFilter = null, occasionFilter = null, seasonFilter = null)
             }

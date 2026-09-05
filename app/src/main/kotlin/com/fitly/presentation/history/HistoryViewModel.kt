@@ -44,6 +44,7 @@ class HistoryViewModel(
     fun onAction(action: HistoryAction) {
         when (action) {
             is HistoryAction.OnFavoriteToggle -> toggleFavorite(action.outfitId)
+            HistoryAction.OnFavoritesOnlyToggle -> _state.update { it.copy(favoritesOnly = !it.favoritesOnly) }
         }
     }
 

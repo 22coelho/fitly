@@ -9,5 +9,7 @@ sealed interface WardrobeAction {
     data class OnOccasionFilterSelected(val occasion: Occasion?) : WardrobeAction
     data class OnSeasonFilterSelected(val season: Season?) : WardrobeAction
     data object OnClearFilters : WardrobeAction
+    data object OnFiltersClick : WardrobeAction
+    data object OnFiltersDismiss : WardrobeAction
     data class OnItemClick(val id: Long) : WardrobeAction
 }

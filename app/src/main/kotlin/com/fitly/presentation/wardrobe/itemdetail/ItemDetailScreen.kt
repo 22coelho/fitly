@@ -2,16 +2,11 @@ package com.fitly.presentation.wardrobe.itemdetail
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,18 +14,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.fitly.R
 import com.fitly.domain.model.ClothingType
 import com.fitly.domain.model.Condition
 import com.fitly.domain.model.Occasion
 import com.fitly.domain.model.Season
-import com.fitly.presentation.labelRes
 import com.fitly.presentation.ObserveAsEvents
-import com.fitly.presentation.designsystem.ClothingPhoto
-import com.fitly.presentation.designsystem.FilterRow
+import com.fitly.presentation.designsystem.FitlyAlertDialog
+import com.fitly.presentation.designsystem.FitlyButton
+import com.fitly.presentation.designsystem.FitlyScaffold
+import com.fitly.presentation.designsystem.FitlyTextButton
 import com.fitly.presentation.designsystem.FitlyTheme
+import com.fitly.presentation.designsystem.FitlyTopAppBar
+import com.fitly.presentation.messageRes
+import com.fitly.presentation.wardrobe.ClothingItemForm
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -40,6 +42,7 @@ fun ItemDetailRoot(
     viewModel: ItemDetailViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -47,7 +50,7 @@ fun ItemDetailRoot(
         when (event) {
             ItemDetailEvent.Saved, ItemDetailEvent.Deleted -> onNavigateBack()
             is ItemDetailEvent.ShowError -> scope.launch {
-                snackbarHostState.showSnackbar(event.error.name)
+                snackbarHostState.showSnackbar(context.getString(event.error.messageRes))
             }
         }
     }
@@ -55,6 +58,7 @@ fun ItemDetailRoot(
     ItemDetailScreen(
         state = state,
         onAction = viewModel::onAction,
+        onBackClick = onNavigateBack,
         snackbarHostState = snackbarHostState,
     )
 }
@@ -63,90 +67,78 @@ fun ItemDetailRoot(
 fun ItemDetailScreen(
     state: ItemDetailState,
     onAction: (ItemDetailAction) -> Unit,
+    onBackClick: () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
-    Scaffold(
-        // Insets belong to the host Scaffold in MainActivity; adding them here doubles them.
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+    FitlyScaffold(
+        topBar = {
+            FitlyTopAppBar(
+                title = stringResource(R.string.item_detail_title),
+                onBackClick = onBackClick,
+            )
+        },
+        snackbarHostState = snackbarHostState,
     ) { padding ->
         if (state.isNotFound) {
             Text(
-                text = "Peça não encontrada.",
-                modifier = Modifier.fillMaxSize().padding(padding),
+                text = stringResource(R.string.item_not_found),
+                modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
             )
-            return@Scaffold
+            return@FitlyScaffold
         }
 
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(vertical = 16.dp),
         ) {
-            ClothingPhoto(photoPath = state.photoPath, dominantColor = null, modifier = Modifier.fillMaxWidth().height(200.dp))
-
-            FilterRow(
-                allLabel = "Tipo: todos",
-                options = ClothingType.entries,
-                selected = state.type,
-                optionLabel = { it.labelRes },
-                onSelected = { it?.let { onAction(ItemDetailAction.OnTypeChanged(it)) } },
-                showAllOption = false,
-            )
-            FilterRow(
-                allLabel = "Ocasião: todos",
-                options = Occasion.entries,
-                selected = state.occasion,
-                optionLabel = { it.labelRes },
-                onSelected = { it?.let { onAction(ItemDetailAction.OnOccasionChanged(it)) } },
-                showAllOption = false,
-            )
-            FilterRow(
-                allLabel = "Estação: todos",
-                options = Season.entries,
-                selected = state.season,
-                optionLabel = { it.labelRes },
-                onSelected = { it?.let { onAction(ItemDetailAction.OnSeasonChanged(it)) } },
-                showAllOption = false,
-            )
-            FilterRow(
-                allLabel = "Condição: todos",
-                options = Condition.entries,
-                selected = state.condition,
-                optionLabel = { it.labelRes },
-                onSelected = { it?.let { onAction(ItemDetailAction.OnConditionChanged(it)) } },
-                showAllOption = false,
+            ClothingItemForm(
+                photoPath = state.photoPath,
+                dominantColor = state.dominantColor,
+                type = state.type,
+                occasion = state.occasion,
+                season = state.season,
+                condition = state.condition,
+                isProcessingPhoto = false,
+                // No photo swap here: there is no Action for one. PRODUCT.md says this screen
+                // allows it, which the code has never done.
+                onPickPhotoClick = null,
+                onTypeSelected = { onAction(ItemDetailAction.OnTypeChanged(it)) },
+                onOccasionSelected = { onAction(ItemDetailAction.OnOccasionChanged(it)) },
+                onSeasonSelected = { onAction(ItemDetailAction.OnSeasonChanged(it)) },
+                onConditionSelected = { onAction(ItemDetailAction.OnConditionChanged(it)) },
             )
 
-            Button(
-                onClick = { onAction(ItemDetailAction.OnSaveClick) },
-                enabled = state.canSave,
-                modifier = Modifier.fillMaxWidth(),
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Text("Guardar")
-            }
-            OutlinedButton(
-                onClick = { onAction(ItemDetailAction.OnDeleteClick) },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text("Apagar")
+                FitlyButton(
+                    text = stringResource(R.string.action_save),
+                    onClick = { onAction(ItemDetailAction.OnSaveClick) },
+                    enabled = state.canSave,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                FitlyTextButton(
+                    text = stringResource(R.string.action_delete),
+                    onClick = { onAction(ItemDetailAction.OnDeleteClick) },
+                    destructive = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
 
         if (state.isDeleteConfirmationVisible) {
-            AlertDialog(
-                onDismissRequest = { onAction(ItemDetailAction.OnCancelDeleteClick) },
-                title = { Text("Apagar peça?") },
-                text = { Text("Esta ação não pode ser desfeita.") },
-                confirmButton = {
-                    Button(onClick = { onAction(ItemDetailAction.OnConfirmDeleteClick) }) {
-                        Text("Apagar")
-                    }
-                },
-                dismissButton = {
-                    OutlinedButton(onClick = { onAction(ItemDetailAction.OnCancelDeleteClick) }) {
-                        Text("Cancelar")
-                    }
-                },
+            FitlyAlertDialog(
+                title = stringResource(R.string.delete_title),
+                text = stringResource(R.string.delete_body),
+                confirmText = stringResource(R.string.action_delete),
+                dismissText = stringResource(R.string.action_cancel),
+                onConfirm = { onAction(ItemDetailAction.OnConfirmDeleteClick) },
+                onDismiss = { onAction(ItemDetailAction.OnCancelDeleteClick) },
+                destructive = true,
             )
         }
     }
@@ -158,6 +150,7 @@ private fun ItemDetailScreenPreview() {
     FitlyTheme {
         ItemDetailScreen(
             state = ItemDetailState(
+                dominantColor = 0xFF6C8C5A.toInt(),
                 type = ClothingType.TOP,
                 occasion = Occasion.CASUAL,
                 season = Season.ALL_YEAR,

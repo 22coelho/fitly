@@ -7,7 +7,6 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -23,13 +22,13 @@ import com.fitly.R
 fun FitlyLargeTopAppBar(
     title: String,
     modifier: Modifier = Modifier,
-    scrollBehavior: TopAppBarScrollBehavior? = null,
+    scrollBehavior: FitlyScrollBehavior? = null,
     actions: @Composable () -> Unit = {},
 ) {
     LargeTopAppBar(
         title = { Text(title, style = MaterialTheme.typography.headlineMedium) },
         actions = { actions() },
-        scrollBehavior = scrollBehavior,
+        scrollBehavior = scrollBehavior?.delegate,
         modifier = modifier,
     )
 }

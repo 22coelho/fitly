@@ -3,6 +3,7 @@ package com.fitly.presentation.designsystem
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -10,8 +11,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.fitly.R
 import com.fitly.domain.model.ClothingItem
 import com.fitly.domain.model.ClothingType
 import com.fitly.domain.model.Condition
@@ -27,6 +30,9 @@ import com.fitly.domain.model.Season
  * stack. That is the layout saying what the model says - three slots are required and one is not.
  *
  * A DRESS fills the top and bottom slots with the same ClothingItem, so it is drawn once.
+ *
+ * The garments share the height they are given rather than each taking a fixed aspect ratio: an
+ * outfit that needs scrolling to see the shoes fails the one question this screen asks.
  */
 @Composable
 fun OutfitPreview(
@@ -39,15 +45,15 @@ fun OutfitPreview(
         outfit.shoes,
     )
     Column(
-        modifier = modifier,
+        modifier = modifier.fillMaxHeight(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         stacked.forEach { item ->
             ClothingPhoto(
                 photoPath = item.photoPath,
                 dominantColor = item.dominantColor,
-                aspectRatio = 4f / 3f,
-                modifier = Modifier.fillMaxWidth(),
+                aspectRatio = null,
+                modifier = Modifier.fillMaxWidth().weight(1f),
             )
         }
         outfit.accessory?.let { accessory ->
@@ -63,7 +69,7 @@ fun OutfitPreview(
                     modifier = Modifier.width(64.dp),
                 )
                 Text(
-                    text = "com acessório",
+                    text = stringResource(R.string.accessory_label),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -95,6 +101,7 @@ private fun OutfitPreviewPreview() {
                 accessory = item.copy(id = 4, dominantColor = 0xFFB4522F.toInt()),
                 status = OutfitStatus.PENDING,
                 favorite = false,
+                createdAt = 0L,
             ),
             modifier = Modifier.width(280.dp),
         )
