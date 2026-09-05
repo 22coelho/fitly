@@ -1,7 +1,8 @@
 package com.fitly.data.datasource
 
 import com.fitly.data.database.OutfitDao
-import com.fitly.data.util.safeRoomCall
+import com.fitly.data.util.safeLocalCall
+import com.fitly.data.util.toEmptyResultOrNotFound
 import com.fitly.domain.datasource.OutfitLocalDataSource
 import com.fitly.domain.model.Outfit
 import com.fitly.domain.model.OutfitStatus
@@ -23,7 +24,7 @@ class RoomOutfitDataSource(
         return Result.Success(entity.toOutfit())
     }
 
-    override suspend fun upsert(outfit: Outfit): Result<Long, DataError.Local> = safeRoomCall {
+    override suspend fun upsert(outfit: Outfit): Result<Long, DataError.Local> = safeLocalCall {
         val generatedId = dao.upsert(outfit.toEntity())
         // Room's @Upsert returns -1 on the update branch; the entity's own id is
         // already the real one whenever this is an update (id != 0).
@@ -31,22 +32,12 @@ class RoomOutfitDataSource(
     }
 
     override suspend fun setStatus(id: Long, status: OutfitStatus): EmptyResult<DataError.Local> {
-        val result = safeRoomCall { dao.setStatus(id, status) }
+        val result = safeLocalCall { dao.setStatus(id, status) }
         return result.toEmptyResultOrNotFound()
     }
 
     override suspend fun setFavorite(id: Long, favorite: Boolean): EmptyResult<DataError.Local> {
-        val result = safeRoomCall { dao.setFavorite(id, favorite) }
+        val result = safeLocalCall { dao.setFavorite(id, favorite) }
         return result.toEmptyResultOrNotFound()
     }
-
-    private fun Result<Int, DataError.Local>.toEmptyResultOrNotFound(): EmptyResult<DataError.Local> =
-        when (this) {
-            is Result.Error -> this
-            is Result.Success -> if (data == 0) {
-                Result.Error(DataError.Local.NOT_FOUND)
-            } else {
-                Result.Success(Unit)
-            }
-        }
 }

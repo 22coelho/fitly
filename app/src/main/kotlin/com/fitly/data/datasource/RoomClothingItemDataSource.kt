@@ -1,7 +1,8 @@
 package com.fitly.data.datasource
 
 import com.fitly.data.database.ClothingItemDao
-import com.fitly.data.util.safeRoomCall
+import com.fitly.data.util.safeLocalCall
+import com.fitly.data.util.toEmptyResultOrNotFound
 import com.fitly.domain.datasource.ClothingItemLocalDataSource
 import com.fitly.domain.model.ClothingItem
 import com.fitly.domain.util.DataError
@@ -22,7 +23,7 @@ class RoomClothingItemDataSource(
         return Result.Success(entity.toClothingItem())
     }
 
-    override suspend fun upsert(item: ClothingItem): Result<Long, DataError.Local> = safeRoomCall {
+    override suspend fun upsert(item: ClothingItem): Result<Long, DataError.Local> = safeLocalCall {
         val generatedId = dao.upsert(item.toEntity())
         // Room's @Upsert returns -1 on the update branch; the entity's own id is
         // already the real one whenever this is an update (id != 0).
@@ -30,14 +31,7 @@ class RoomClothingItemDataSource(
     }
 
     override suspend fun delete(id: Long): EmptyResult<DataError.Local> {
-        val result = safeRoomCall { dao.deleteById(id) }
-        return when (result) {
-            is Result.Error -> result
-            is Result.Success -> if (result.data == 0) {
-                Result.Error(DataError.Local.NOT_FOUND)
-            } else {
-                Result.Success(Unit)
-            }
-        }
+        val result = safeLocalCall { dao.deleteById(id) }
+        return result.toEmptyResultOrNotFound()
     }
 }
