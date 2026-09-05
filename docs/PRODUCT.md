@@ -53,8 +53,9 @@ Todos os textos visíveis estão em português, incluindo os valores das etiquet
 cada enum do domínio para a string que o utilizador lê vive em `presentation/Labels.kt` e em
 `strings.xml`, e o domínio continua sem saber que existe uma UI.
 
-Os três separadores têm um título grande em serifada, fixo no topo e que não colapsa com o scroll.
-Os dois ecrãs empurrados têm uma barra pequena com botão de voltar.
+Os três separadores têm um título grande em serifada, que colapsa para uma barra de uma linha à
+medida que o conteúdo passa por baixo. Os dois ecrãs empurrados têm uma barra pequena com botão de
+voltar.
 
 ### 1. Wardrobe — separador, ecrã inicial
 

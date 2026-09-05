@@ -13,22 +13,22 @@ import androidx.compose.ui.res.stringResource
 import com.fitly.R
 
 /**
- * The title on a top-level tab, in the serif display face.
- *
- * Deliberately pinned: no scroll behaviour is wired up, so it stays at full height on every tab
- * whether or not the content below it scrolls. Collapsing it only on the tabs that happen to
- * scroll made the same title behave differently from one tab to the next.
+ * The title on a top-level tab, in the serif display face, collapsing as the content scrolls under
+ * it. Pass the [scrollBehavior] from `rememberTopAppBarScrollBehavior` and hand the same one to
+ * the screen's `Modifier.nestedScroll`, or it will not collapse.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FitlyLargeTopAppBar(
     title: String,
     modifier: Modifier = Modifier,
+    scrollBehavior: FitlyScrollBehavior? = null,
     actions: @Composable () -> Unit = {},
 ) {
     LargeTopAppBar(
         title = { Text(title, style = MaterialTheme.typography.headlineMedium) },
         actions = { actions() },
+        scrollBehavior = scrollBehavior?.delegate,
         modifier = modifier,
     )
 }

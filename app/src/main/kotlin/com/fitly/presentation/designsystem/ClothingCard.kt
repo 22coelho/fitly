@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fitly.domain.model.ClothingItem
@@ -47,7 +48,10 @@ fun ClothingCard(
             photoPath = item.photoPath,
             dominantColor = item.dominantColor,
             fit = PhotoFit.Cover,
-            shape = shape,
+            // Square, not the card's rounded shape: the Column above already clips the whole cell,
+            // and rounding the photo's bottom corners too left two empty wedges either side of the
+            // colour bar.
+            shape = RectangleShape,
             outlined = false,
             modifier = Modifier.fillMaxWidth(),
         )
