@@ -3,6 +3,7 @@ package com.fitly
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -36,6 +37,7 @@ import com.fitly.presentation.wardrobe.wardrobeGraph
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
             FitlyTheme {
@@ -55,8 +57,10 @@ private data class BottomTab(
 )
 
 private val bottomTabs = listOf(
-    BottomTab(HomeRoute, "Home", Icons.Default.Home) { it?.hasRoute(HomeRoute::class) == true },
+    // Wardrobe comes first because it is the start destination: without ClothingItems there is
+    // nothing for the Outfit Generator to work with.
     BottomTab(WardrobeRoute, "Wardrobe", Icons.AutoMirrored.Filled.List) { it?.hasRoute(WardrobeRoute::class) == true },
+    BottomTab(HomeRoute, "Home", Icons.Default.Home) { it?.hasRoute(HomeRoute::class) == true },
     BottomTab(HistoryRoute, "Histórico", Icons.Default.DateRange) { it?.hasRoute(HistoryRoute::class) == true },
 )
 

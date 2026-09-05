@@ -32,6 +32,7 @@ data class ResolvedOutfit(
     val accessory: ClothingItem?,
     val status: OutfitStatus,
     val favorite: Boolean,
+    val createdAt: Long,
 )
 
 /** Null when a required slot's [ClothingItem] can no longer be found in [itemsById]. */
@@ -40,5 +41,5 @@ fun Outfit.resolve(itemsById: Map<Long, ClothingItem>): ResolvedOutfit? {
     val bottom = itemsById[bottomItemId] ?: return null
     val shoes = itemsById[shoesItemId] ?: return null
     val accessory = accessoryItemId?.let { itemsById[it] }
-    return ResolvedOutfit(id, top, bottom, shoes, accessory, status, favorite)
+    return ResolvedOutfit(id, top, bottom, shoes, accessory, status, favorite, createdAt)
 }

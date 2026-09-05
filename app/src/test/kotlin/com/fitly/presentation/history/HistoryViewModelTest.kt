@@ -94,4 +94,41 @@ class HistoryViewModelTest {
             assertThat(awaitItem()).isEqualTo(HistoryEvent.ShowError(DataError.Local.DISK_FULL))
         }
     }
+
+    private suspend fun seedWardrobe() {
+        clothingItemDataSource.upsert(testClothingItem(ClothingType.TOP))
+        clothingItemDataSource.upsert(testClothingItem(ClothingType.BOTTOM))
+        clothingItemDataSource.upsert(testClothingItem(ClothingType.SHOES))
+    }
+
+    @Test
+    fun `the favourites filter hides everything else`() = runTest {
+        seedWardrobe()
+        outfitDataSource.upsert(testOutfit(OutfitStatus.ACCEPTED, createdAt = 100L, favorite = false))
+        outfitDataSource.upsert(testOutfit(OutfitStatus.ACCEPTED, createdAt = 200L, favorite = true))
+        val viewModel = buildViewModel()
+
+        viewModel.state.test {
+            assertThat(awaitItem().visibleOutfits).hasSize(2)
+
+            viewModel.onAction(HistoryAction.OnFavoritesOnlyToggle)
+            val filtered = awaitItem()
+            assertThat(filtered.visibleOutfits).hasSize(1)
+            assertThat(filtered.visibleOutfits.first().favorite).isTrue()
+
+            viewModel.onAction(HistoryAction.OnFavoritesOnlyToggle)
+            assertThat(awaitItem().visibleOutfits).hasSize(2)
+        }
+    }
+
+    @Test
+    fun `a resolved outfit carries the date it was created`() = runTest {
+        seedWardrobe()
+        outfitDataSource.upsert(testOutfit(OutfitStatus.ACCEPTED, createdAt = 1_700_000_000_000L))
+        val viewModel = buildViewModel()
+
+        viewModel.state.test {
+            assertThat(awaitItem().outfits.single().createdAt).isEqualTo(1_700_000_000_000L)
+        }
+    }
 }
