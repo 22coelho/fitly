@@ -1,7 +1,12 @@
+<img src="docs/assets/icon.svg" alt="Fitly app icon" width="72" height="72" align="left" />
+
 # Fitly
 
 Android wardrobe app: photograph each item of clothing, tag it with four labels, and the app
 randomly suggests an outfit from what you have.
+
+<br clear="left" />
+
 
 - **Android-only**, no KMP, no iOS.
 - **User data never leaves the device** — no photo, tag, or outfit is ever sent anywhere. One

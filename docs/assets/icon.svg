@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -40 592 592" width="512" height="512">
+  <!-- App icon: a lowercase "f" drawn as a single bold monoline stroke on a diagonal gradient
+       across the app's primary terracotta family (Color.kt's P48 #BA532E, from the seed in
+       ADR 0007). The hook at the top is deliberately open and rounded so its silhouette reads as
+       a coat-hanger hook, tying the mark to the wardrobe domain rather than being a plain
+       letterform (cf. Pinterest's "P" reading as a pin). Mirrors the same shapes as
+       app/src/main/res/drawable/ic_launcher_{background,foreground}.xml, scaled up
+       (108dp canvas x 4.74074) for use outside the app itself, e.g. in the README. The drop
+       shadow here is a README-only touch - Android's vector drawable format has no blur filter,
+       so the in-app icon stays flat-shadowed by design, not by omission. -->
+  <defs>
+    <linearGradient id="bg" x1="8" y1="8" x2="500" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#D6795A" />
+      <stop offset="0.5" stop-color="#BA532E" />
+      <stop offset="1" stop-color="#8B3C1E" />
+    </linearGradient>
+    <linearGradient id="letter" x1="247" y1="119" x2="247" y2="370" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" />
+      <stop offset="1" stop-color="#FFF3EC" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#5C2A15" flood-opacity="0.35" />
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)" filter="url(#shadow)" />
+  <path
+    d="M299,142 C237,119 194,152 213,204 L213,370"
+    fill="none" stroke="url(#letter)" stroke-width="62" stroke-linecap="round" stroke-linejoin="round" />
+  <path
+    d="M161,237 L275,237"
+    fill="none" stroke="#FFFFFF" stroke-width="62" stroke-linecap="round" />
+</svg>
