@@ -1,7 +1,8 @@
 # FITLY
 
 Android wardrobe app: photograph your clothes, tag them, and get a random outfit suggestion.
-Offline-only, no network calls, no ML.
+Offline-first: no domain data (photos, tags, outfits) ever leaves the device. One narrow,
+documented exception exists — see the Type Suggestion note under Architecture.
 
 - `CONTEXT.md` — domain glossary. Read it before naming anything; it also lists terms to avoid.
 - `docs/PRODUCT.md` — what the product is, the features and screens that exist today, and the
@@ -52,6 +53,17 @@ Single module, layered by package (ADR 0004): `domain/`, `data/`, `presentation/
   `IDLE`. This is what blocks double-tap races; keep the ordering.
 - **Shared display type**: `Outfit.resolve(itemsById)` → `ResolvedOutfit` turns slot ids into
   `ClothingItem`s. Both Home and History use it — don't reintroduce per-screen copies.
+- **`TypeSuggester`** (mirrors `DominantColorExtractor`'s shape) guesses a `ClothingItem`'s Type
+  from its photo via ML Kit, called from `AddItemViewModel` the same way colour extraction is. The
+  label-to-`ClothingType` decision logic is pure (`domain/classifier/GarmentTypeMapper`, no
+  `android.*` import) so it's unit-tested directly; the ML Kit call itself isn't testable at all
+  (no Robolectric shadow for real model inference) and is only verified by running the emulator.
+  See ADR 0008 for the mapping table and the confidence/tie-break rules.
+- **This app's one exception to "no domain data leaves the device"**: ML Kit's bundled Image
+  Labeling still sends its own usage telemetry over the network — confirmed in the emulator logs
+  and in Google's own ML Kit terms page, with no opt-out. Never the photo, never the result, only
+  library-performance metadata. Weigh this before adding any other third-party ML/vision library —
+  check its own terms page for the same clause before assuming "bundled" means "no network."
 
 ### Navigation trap
 
@@ -145,3 +157,17 @@ use JUnit4, bridged by the vintage engine.
 - **Keep this file current.** When a change introduces a pattern, a gotcha, a pinned version, or a
   shared abstraction a future session would need, update the relevant section here as part of that
   change — don't wait to be asked.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live as GitHub issues on `22coelho/fitly` (via the `gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default label vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.

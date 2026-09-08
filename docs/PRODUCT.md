@@ -11,13 +11,17 @@ O utilizador fotografa cada peça de roupa, marca-a com quatro etiquetas, e a ap
 aleatoriamente um outfit a partir dessas peças. Cada sugestão é aceite ou rejeitada, e fica
 registada no histórico.
 
-Três restrições definem o produto (ADRs 0001 e 0002):
+Três restrições definem o produto (ADRs 0001, 0002 e 0008):
 
 - **Android-only.** Sem KMP, sem iOS.
-- **100% offline.** Zero chamadas de rede — sem serviços cloud, sem API de meteorologia.
-- **Sem machine learning.** O gerador é aleatoriedade pura dentro do filtro escolhido; não aprende
-  com o que o utilizador aceita ou rejeita. A extração de cor é análise de imagem no dispositivo
-  (Palette), não ML.
+- **Os dados do utilizador nunca saem do dispositivo.** Nenhuma foto, tag ou outfit é enviado para
+  fora — sem serviços cloud, sem API de meteorologia. Uma excepção restrita e documentada existe: a
+  Sugestão de Tipo (ver "Adicionar peça") usa o ML Kit, que envia telemetria própria de utilização
+  da biblioteca (nunca a foto, nunca o resultado) — ver ADR 0008.
+- **Sem machine learning à medida.** O gerador é aleatoriedade pura dentro do filtro escolhido; não
+  aprende com o que o utilizador aceita ou rejeita. A extração de cor é análise de imagem no
+  dispositivo (Palette), não ML. A Sugestão de Tipo é a única excepção: usa um classificador de
+  imagem genérico (ML Kit), não um modelo treinado para esta app (ver ADR 0008).
 
 ## Modelo em termos de produto
 
@@ -79,8 +83,10 @@ Não há filtro por Condição, nem pesquisa por texto.
 Formulário para criar uma peça.
 
 - **A própria fotografia é o botão**: tocar nela abre o *Android Photo Picker* (não a câmara — ver
-  Lacunas). Ao escolher, a foto é copiada para o armazenamento interno da app e a cor dominante é
-  extraída nesse momento.
+  Lacunas). Ao escolher, a foto é copiada para o armazenamento interno da app, a cor dominante é
+  extraída nesse momento, e o campo Tipo pode vir pré-preenchido por uma **Sugestão de Tipo** — um
+  palpite de melhor esforço a partir da foto, presente só para algumas peças (ver ADR 0008), sempre
+  editável e indistinguível de uma escolha manual. Nunca substitui um Tipo já escolhido.
 - Quatro campos obrigatórios, sem opção "todos". Tipo e Ocasião são linhas de chips (cinco valores
   cada); Estação e Condição são controlos segmentados, que a três valores dizem melhor "escolhe
   exatamente um".

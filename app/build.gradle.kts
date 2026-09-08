@@ -79,8 +79,10 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     implementation(libs.androidx.palette)
+    implementation(libs.mlkit.image.labeling)
 
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     testImplementation(platform(libs.junit5.bom))
     testImplementation(libs.junit.jupiter.api)

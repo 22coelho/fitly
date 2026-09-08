@@ -9,8 +9,12 @@ O conjunto completo de `ClothingItem` de um utilizador dentro da app.
 _Avoid_: Guarda-roupa (usar Wardrobe mesmo em conversa PT, para manter um único termo no código e na documentação), Closet
 
 **ClothingItem**:
-Uma peça de roupa individual, adicionada por foto. A cor é extraída automaticamente da foto (cor dominante, sem ML); tipo, Occasion, estação e condição são escolhidos manualmente pelo utilizador de uma lista fixa. Cada ClothingItem preenche um slot no Outfit: Top, Bottom ou Shoes — exceto Vestido, que preenche Top+Bottom em simultâneo.
-_Avoid_: Item, Peça (usar ClothingItem no código; "peça" é aceitável em conversa), auto-tagging por ML (não existe no MVP — ver ADR 0002)
+Uma peça de roupa individual, adicionada por foto. A cor é extraída automaticamente da foto (cor dominante, sem ML); tipo pode vir pré-preenchido por Type Suggestion mas fica sempre editável, e Occasion, estação e condição são sempre escolhidos manualmente pelo utilizador de uma lista fixa. Cada ClothingItem preenche um slot no Outfit: Top, Bottom ou Shoes — exceto Vestido, que preenche Top+Bottom em simultâneo.
+_Avoid_: Item, Peça (usar ClothingItem no código; "peça" é aceitável em conversa), auto-tagging por ML (termo mais amplo do domínio, continua rejeitado/adiado — ver Type Suggestion para o que existe hoje, e ADR 0008)
+
+**Type Suggestion**:
+Um palpite de melhor esforço para o campo tipo de um ClothingItem, a partir da foto escolhida, usando o ML Kit Image Labeling (a inferência corre on-device; a biblioteca em si envia telemetria própria de utilização, sem opt-out — nunca a foto nem o resultado, ver ADR 0008). Cobertura parcial e deliberadamente inconsistente entre categorias — só alguns rótulos mapeiam sem ambiguidade para tipo (ver ADR 0008). Só preenche o campo quando está vazio, nunca substitui um valor já lá; fica sempre editável e visualmente indistinguível de uma escolha manual.
+_Avoid_: Sugestão de Tipo (usar Type Suggestion no código; "sugestão de tipo" é aceitável em conversa), auto-tagging (termo mais amplo do domínio — ver ClothingItem)
 
 **Occasion**:
 Vocabulário fixo e partilhado, usado tanto como tag do `ClothingItem` como filtro no Outfit Generator — o mesmo campo em ambos, sem camada de mapeamento. Lista inicial: Casual, Trabalho, Desporto, Formal, Encontro (expansível mais tarde).

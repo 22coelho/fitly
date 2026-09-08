@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.fitly.domain.datasource.ClothingItemLocalDataSource
 import com.fitly.domain.datasource.DominantColorExtractor
 import com.fitly.domain.datasource.PhotoLocalDataSource
+import com.fitly.domain.datasource.TypeSuggester
 import com.fitly.domain.util.onFailure
 import com.fitly.domain.util.onSuccess
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,6 +20,7 @@ class AddItemViewModel(
     private val colorExtractor: DominantColorExtractor,
     private val photoLocalDataSource: PhotoLocalDataSource,
     private val clothingItemLocalDataSource: ClothingItemLocalDataSource,
+    private val typeSuggester: TypeSuggester,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddItemState())
@@ -41,10 +44,20 @@ class AddItemViewModel(
         if (_state.value.status != AddItemStatus.IDLE) return
         _state.update { it.copy(status = AddItemStatus.PROCESSING_PHOTO) }
         viewModelScope.launch {
-            val dominantColor = colorExtractor.extract(photoBytes)
+            val dominantColorAsync = async { colorExtractor.extract(photoBytes) }
+            val suggestedTypeAsync = async { typeSuggester.suggest(photoBytes) }
+            val dominantColor = dominantColorAsync.await()
+            val suggestedType = suggestedTypeAsync.await()
             photoLocalDataSource.save(photoBytes)
                 .onSuccess { path ->
-                    _state.update { it.copy(photoPath = path, dominantColor = dominantColor, status = AddItemStatus.IDLE) }
+                    _state.update {
+                        it.copy(
+                            photoPath = path,
+                            dominantColor = dominantColor,
+                            type = it.type ?: suggestedType,
+                            status = AddItemStatus.IDLE,
+                        )
+                    }
                 }
                 .onFailure { error ->
                     _state.update { it.copy(status = AddItemStatus.IDLE) }
