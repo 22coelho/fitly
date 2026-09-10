@@ -4,4 +4,5 @@ import com.fitly.domain.util.DataError
 
 sealed interface HistoryEvent {
     data class ShowError(val error: DataError.Local) : HistoryEvent
+    data object NavigateToHome : HistoryEvent
 }

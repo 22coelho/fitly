@@ -135,6 +135,12 @@ lado, e é o único que faz sentido: a flag é do Outfit, não da peça.
 Os outfits ainda por decidir (`PENDING`) não aparecem. A lista é só de leitura fora do favorito —
 não se apaga nem se reabre um outfit.
 
+Cada outfit **Aceite** tem um botão "voltar a vestir": gera um novo outfit `PENDING` com as mesmas
+peças (nunca favorito, mesmo que o original seja) e leva para o Home, onde aparece como um cartão
+pendente comum — indistinguível de uma geração aleatória, para decidir com Aceitar/Rejeitar como
+qualquer sugestão nova. A entrada original do Histórico nunca é tocada. Os outfits **Rejeitados**
+não têm este botão — rejeitar já é um "não" explícito.
+
 ## Lacunas conhecidas
 
 Coisas que um leitor assume que existem, mas não existem — algumas por decisão, outras por estarem
@@ -163,6 +169,5 @@ a meio.
   não a fotografia; o `AddItem` é o único sítio onde uma foto entra na app. Trocar a foto de uma
   peça implica apagá-la e voltar a adicioná-la.
 - A composição de um outfit não é editável: não se troca uma peça de uma sugestão, só se gera outra.
-- Não há forma de repetir/vestir de novo um outfit do histórico.
 - Sem ecrã de definições e sem onboarding. Os erros são um snackbar com uma frase em português
   (os três valores de `DataError.Local` estão traduzidos), sem retry nem detalhe.

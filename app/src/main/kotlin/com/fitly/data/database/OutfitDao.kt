@@ -14,6 +14,9 @@ interface OutfitDao {
     @Query("SELECT * FROM outfits WHERE id = :id")
     suspend fun getById(id: Long): OutfitEntity?
 
+    @Query("SELECT * FROM outfits WHERE status = :pendingStatus ORDER BY createdAt DESC LIMIT 1")
+    suspend fun getPending(pendingStatus: OutfitStatus = OutfitStatus.PENDING): OutfitEntity?
+
     @Upsert
     suspend fun upsert(outfit: OutfitEntity): Long
 

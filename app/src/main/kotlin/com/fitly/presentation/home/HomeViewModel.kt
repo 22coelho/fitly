@@ -40,6 +40,16 @@ class HomeViewModel(
             .onEach { items -> wardrobeItems = items }
             .catch { }
             .launchIn(viewModelScope)
+
+        // A pending outfit is already persisted the moment it's generated (see generate()), so
+        // it survives this ViewModel being recreated - e.g. "voltar a vestir" from History, or
+        // process death - instead of only living in in-memory state.
+        viewModelScope.launch {
+            outfitLocalDataSource.getPending().onSuccess { pending ->
+                val resolved = pending?.resolve(wardrobeItems.associateBy { it.id })
+                if (resolved != null) _state.update { it.copy(outfit = resolved) }
+            }
+        }
     }
 
     fun onAction(action: HomeAction) {

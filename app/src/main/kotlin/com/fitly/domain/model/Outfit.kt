@@ -35,6 +35,10 @@ data class ResolvedOutfit(
     val createdAt: Long,
 )
 
+/** A copy of this [Outfit] as a fresh proposal to decide on again: same items and occasion,
+ * but a new pending record rather than a mutation of the one it came from. */
+fun Outfit.rewear(now: Long): Outfit = copy(id = 0, status = OutfitStatus.PENDING, favorite = false, createdAt = now)
+
 /** Null when a required slot's [ClothingItem] can no longer be found in [itemsById]. */
 fun Outfit.resolve(itemsById: Map<Long, ClothingItem>): ResolvedOutfit? {
     val top = itemsById[topItemId] ?: return null

@@ -53,6 +53,12 @@ Single module, layered by package (ADR 0004): `domain/`, `data/`, `presentation/
   `IDLE`. This is what blocks double-tap races; keep the ordering.
 - **Shared display type**: `Outfit.resolve(itemsById)` → `ResolvedOutfit` turns slot ids into
   `ClothingItem`s. Both Home and History use it — don't reintroduce per-screen copies.
+- **`Outfit.rewear(now)`** (History's "voltar a vestir") copies an Outfit's items and occasion into
+  a fresh `PENDING`, unfavorited record rather than mutating the one it came from — History stays
+  append-only. `HomeViewModel` shows it because its `init` also hydrates `state.outfit` from
+  `OutfitLocalDataSource.getPending()` (the most recently created still-`PENDING` row), not only
+  from a same-instance `generate()` call — this is what lets a freshly constructed `HomeViewModel`
+  pick up an outfit persisted by a different screen's ViewModel.
 - **`TypeSuggester`** (mirrors `DominantColorExtractor`'s shape) guesses a `ClothingItem`'s Type
   from its photo via ML Kit, called from `AddItemViewModel` the same way colour extraction is. The
   label-to-`ClothingType` decision logic is pure (`domain/classifier/GarmentTypeMapper`, no
@@ -70,6 +76,16 @@ Single module, layered by package (ADR 0004): `domain/`, `data/`, `presentation/
 A nested graph's identity route must be a **different type** from its own start destination, or
 `navigation<X>(startDestination = X)` throws at runtime and the app crashes on every launch. This
 is why `WardrobeGraphRoute` exists as a marker separate from `WardrobeRoute`.
+
+Navigating **into** a bottom-tab route from somewhere other than its own tab click (e.g. History's
+"voltar a vestir" pushing `HomeRoute`) must pop its source route off inclusively —
+`popUpTo<HistoryRoute> { inclusive = true }` — rather than doing a bare `navigate(HomeRoute)`. A
+bare push leaves a second `HomeRoute` back-stack entry sitting alongside the tab bar's own saved
+one; nothing crashes, but the *next* bottom-tab tap (`popUpTo(start){saveState=true}` +
+`restoreState=true`) silently stops navigating anywhere; tapping a tab item no longer does
+anything visible, with no exception or log line to point at it. Found by running the emulator, not
+by the test suite or a code review — this class of bug shows up only as "the button doesn't do
+anything."
 
 ### Compose notes
 

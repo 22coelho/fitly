@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -53,7 +54,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun HistoryRoot(viewModel: HistoryViewModel = koinViewModel()) {
+fun HistoryRoot(onNavigateToHome: () -> Unit = {}, viewModel: HistoryViewModel = koinViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -63,6 +64,7 @@ fun HistoryRoot(viewModel: HistoryViewModel = koinViewModel()) {
         when (event) {
             is HistoryEvent.ShowError ->
                 scope.launch { snackbarHostState.showSnackbar(context.getString(event.error.messageRes)) }
+            HistoryEvent.NavigateToHome -> onNavigateToHome()
         }
     }
 
@@ -151,6 +153,14 @@ private fun HistoryOutfitCard(outfit: ResolvedOutfit, onAction: (HistoryAction) 
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
             )
+            // Rejeitado é um "não" explícito - não faz sentido voltar a propô-lo.
+            if (outfit.status == OutfitStatus.ACCEPTED) {
+                FitlyIconButton(
+                    icon = Icons.Default.Refresh,
+                    contentDescription = stringResource(R.string.cd_rewear),
+                    onClick = { onAction(HistoryAction.OnRewearClick(outfit.outfitId)) },
+                )
+            }
             FitlyIconButton(
                 icon = if (outfit.favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = stringResource(

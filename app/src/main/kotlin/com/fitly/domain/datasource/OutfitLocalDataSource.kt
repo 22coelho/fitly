@@ -11,6 +11,8 @@ interface OutfitLocalDataSource {
     /** Outfits with status != PENDING, most recent first. */
     fun observeHistory(): Flow<List<Outfit>>
     suspend fun getById(id: Long): Result<Outfit, DataError.Local>
+    /** The most recently created outfit still awaiting a decision, or null if there is none. */
+    suspend fun getPending(): Result<Outfit?, DataError.Local>
     suspend fun upsert(outfit: Outfit): Result<Long, DataError.Local>
     suspend fun setStatus(id: Long, status: OutfitStatus): EmptyResult<DataError.Local>
     suspend fun setFavorite(id: Long, favorite: Boolean): EmptyResult<DataError.Local>

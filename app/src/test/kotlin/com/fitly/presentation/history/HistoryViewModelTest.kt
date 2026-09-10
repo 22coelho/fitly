@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import assertk.assertThat
 import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
 import assertk.assertions.isTrue
 import com.fitly.domain.model.ClothingType
 import com.fitly.domain.model.Outfit
@@ -13,6 +14,7 @@ import com.fitly.fakes.FakeClothingItemLocalDataSource
 import com.fitly.fakes.FakeOutfitLocalDataSource
 import com.fitly.testutil.MainDispatcherExtension
 import com.fitly.testutil.testClothingItem
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
@@ -119,6 +121,61 @@ class HistoryViewModelTest {
             viewModel.onAction(HistoryAction.OnFavoritesOnlyToggle)
             assertThat(awaitItem().visibleOutfits).hasSize(2)
         }
+    }
+
+    @Test
+    fun `rewear persists a fresh pending copy of the outfit and navigates home`() = runTest {
+        seedWardrobe()
+        outfitDataSource.upsert(testOutfit(OutfitStatus.ACCEPTED, createdAt = 100L))
+        val viewModel = buildViewModel()
+        val outfitId = viewModel.state.value.outfits.first().outfitId
+
+        viewModel.events.test {
+            viewModel.onAction(HistoryAction.OnRewearClick(outfitId))
+            assertThat(awaitItem()).isEqualTo(HistoryEvent.NavigateToHome)
+        }
+
+        val pending = outfitDataSource.all.single { it.status == OutfitStatus.PENDING }
+        assertThat(pending.topItemId).isEqualTo(1L)
+        assertThat(pending.bottomItemId).isEqualTo(2L)
+        assertThat(pending.shoesItemId).isEqualTo(3L)
+        assertThat(pending.favorite).isFalse()
+    }
+
+    @Test
+    fun `a failed rewear shows an error`() = runTest {
+        seedWardrobe()
+        outfitDataSource.upsert(testOutfit(OutfitStatus.ACCEPTED, createdAt = 100L))
+        outfitDataSource.upsertError = DataError.Local.DISK_FULL
+        val viewModel = buildViewModel()
+        val outfitId = viewModel.state.value.outfits.first().outfitId
+
+        viewModel.events.test {
+            viewModel.onAction(HistoryAction.OnRewearClick(outfitId))
+            assertThat(awaitItem()).isEqualTo(HistoryEvent.ShowError(DataError.Local.DISK_FULL))
+        }
+    }
+
+    @Test
+    fun `a second rewear click while saving is ignored`() = runTest {
+        seedWardrobe()
+        outfitDataSource.upsert(testOutfit(OutfitStatus.ACCEPTED, createdAt = 100L))
+        val viewModel = buildViewModel()
+        val outfitId = viewModel.state.value.outfits.first().outfitId
+        outfitDataSource.upsertGate = CompletableDeferred()
+
+        viewModel.state.test {
+            awaitItem() // initial
+
+            viewModel.onAction(HistoryAction.OnRewearClick(outfitId))
+            assertThat(awaitItem().status).isEqualTo(HistoryStatus.SAVING)
+
+            viewModel.onAction(HistoryAction.OnRewearClick(outfitId))
+
+            outfitDataSource.upsertGate?.complete(Unit)
+            assertThat(awaitItem().status).isEqualTo(HistoryStatus.IDLE)
+        }
+        assertThat(outfitDataSource.all.count { it.status == OutfitStatus.PENDING }).isEqualTo(1)
     }
 
     @Test

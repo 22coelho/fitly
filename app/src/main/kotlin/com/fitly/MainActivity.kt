@@ -102,7 +102,21 @@ private fun FitlyNavHost() {
             modifier = Modifier.padding(padding),
         ) {
             composable<HomeRoute> { HomeRoot() }
-            composable<HistoryRoute> { HistoryRoot() }
+            composable<HistoryRoute> {
+                HistoryRoot(
+                    // Pops History away as part of the same navigate call (rather than pushing
+                    // Home on top of it) so there's never more than one HomeRoute entry on the
+                    // back stack - two coexisting entries confuses the bottom bar's own
+                    // popUpTo(start){saveState=true}/restoreState navigation afterwards. A fresh
+                    // HomeRoute entry means a fresh HomeViewModel, which is what re-runs the
+                    // getPending() hydration in init that picks up the outfit rewear() just
+                    // persisted - HomeRoute's old saved tab entry, if any, may be showing a stale
+                    // outfit.
+                    onNavigateToHome = {
+                        navController.navigate(HomeRoute) { popUpTo<HistoryRoute> { inclusive = true } }
+                    },
+                )
+            }
             wardrobeGraph(navController)
         }
     }

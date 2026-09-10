@@ -142,7 +142,26 @@ class RoomOutfitDataSourceTest {
         assertThat(result).isEqualTo(Result.Error(DataError.Local.NOT_FOUND))
     }
 
-    private fun testOutfit(status: OutfitStatus, favorite: Boolean = false) = Outfit(
+    @Test
+    fun `getPending returns null when there is no pending outfit`() = runTest {
+        dataSource.upsert(testOutfit(status = OutfitStatus.ACCEPTED))
+
+        val result = dataSource.getPending()
+
+        assertThat(result).isEqualTo(Result.Success(null))
+    }
+
+    @Test
+    fun `getPending returns the most recently created pending outfit`() = runTest {
+        dataSource.upsert(testOutfit(status = OutfitStatus.PENDING, createdAt = 1_000L))
+        val newer = dataSource.upsert(testOutfit(status = OutfitStatus.PENDING, createdAt = 2_000L)) as Result.Success
+
+        val result = dataSource.getPending() as Result.Success
+
+        assertThat(result.data?.id).isEqualTo(newer.data)
+    }
+
+    private fun testOutfit(status: OutfitStatus, favorite: Boolean = false, createdAt: Long = 0L) = Outfit(
         topItemId = topId,
         bottomItemId = bottomId,
         shoesItemId = shoesId,
@@ -150,7 +169,7 @@ class RoomOutfitDataSourceTest {
         occasion = Occasion.CASUAL,
         status = status,
         favorite = favorite,
-        createdAt = 0L,
+        createdAt = createdAt,
     )
 
     private fun testClothingItem(type: ClothingType) = ClothingItemEntity(

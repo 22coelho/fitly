@@ -24,6 +24,10 @@ class RoomOutfitDataSource(
         return Result.Success(entity.toOutfit())
     }
 
+    override suspend fun getPending(): Result<Outfit?, DataError.Local> = safeLocalCall {
+        dao.getPending()?.toOutfit()
+    }
+
     override suspend fun upsert(outfit: Outfit): Result<Long, DataError.Local> = safeLocalCall {
         val generatedId = dao.upsert(outfit.toEntity())
         // Room's @Upsert returns -1 on the update branch; the entity's own id is

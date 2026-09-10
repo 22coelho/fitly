@@ -33,6 +33,11 @@ class FakeOutfitLocalDataSource : OutfitLocalDataSource {
         return Result.Success(outfit)
     }
 
+    override suspend fun getPending(): Result<Outfit?, DataError.Local> {
+        val pending = outfits.value.filter { it.status == OutfitStatus.PENDING }.maxByOrNull { it.createdAt }
+        return Result.Success(pending)
+    }
+
     override suspend fun upsert(outfit: Outfit): Result<Long, DataError.Local> {
         upsertGate?.await()
         upsertError?.let { return Result.Error(it) }

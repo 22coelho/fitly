@@ -11,8 +11,10 @@ import assertk.assertions.isTrue
 import com.fitly.domain.generator.OutfitGenerator
 import com.fitly.domain.model.ClothingType
 import com.fitly.domain.model.Occasion
+import com.fitly.domain.model.Outfit
 import com.fitly.domain.model.OutfitStatus
 import com.fitly.domain.util.DataError
+import com.fitly.domain.util.Result
 import com.fitly.fakes.FakeClothingItemLocalDataSource
 import com.fitly.fakes.FakeOutfitLocalDataSource
 import com.fitly.testutil.MainDispatcherExtension
@@ -212,6 +214,44 @@ class HomeViewModelTest {
             val generated = awaitItem()
             assertThat(generated.noItemsAvailable).isFalse()
             assertThat(generated.outfit).isNotNull()
+        }
+    }
+
+    @Test
+    fun `a pending outfit already in the database is shown on start`() = runTest {
+        val topId = (clothingItemDataSource.upsert(testClothingItem(ClothingType.TOP)) as Result.Success).data
+        val bottomId = (clothingItemDataSource.upsert(testClothingItem(ClothingType.BOTTOM)) as Result.Success).data
+        val shoesId = (clothingItemDataSource.upsert(testClothingItem(ClothingType.SHOES)) as Result.Success).data
+        outfitDataSource.upsert(
+            Outfit(
+                topItemId = topId,
+                bottomItemId = bottomId,
+                shoesItemId = shoesId,
+                accessoryItemId = null,
+                occasion = null,
+                status = OutfitStatus.PENDING,
+                favorite = false,
+                createdAt = 100L,
+            ),
+        )
+
+        val viewModel = buildViewModel()
+
+        viewModel.state.test {
+            val initial = awaitItem()
+            assertThat(initial.outfit?.status).isEqualTo(OutfitStatus.PENDING)
+            assertThat(initial.outfit?.top?.type).isEqualTo(ClothingType.TOP)
+        }
+    }
+
+    @Test
+    fun `no pending outfit in the database leaves the outfit blank on start`() = runTest {
+        clothingItemDataSource.upsert(testClothingItem(ClothingType.TOP))
+
+        val viewModel = buildViewModel()
+
+        viewModel.state.test {
+            assertThat(awaitItem().outfit).isNull()
         }
     }
 

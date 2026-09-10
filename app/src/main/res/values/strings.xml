@@ -86,5 +86,6 @@
     <string name="cd_add_item">Adicionar peça</string>
     <string name="cd_favorite">Marcar como favorito</string>
     <string name="cd_unfavorite">Remover dos favoritos</string>
+    <string name="cd_rewear">Voltar a vestir</string>
     <string name="cd_clothing_photo">Foto da peça</string>
 </resources>
